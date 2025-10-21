@@ -1,21 +1,24 @@
-import { Module } from '@nestjs/common';
+import { Module, RequestMethod } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DocumentoAnexoModule } from './documento-anexo/documento-anexo.module';
+import { AuthModule } from './auth/auth.module';
+import { ContraseñasModule } from './contraseñas/contraseñas.module';
+import { ConsentimientosController } from './consentimientos/consentimientos.controller';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/',
-      exclude: ['/api*'],
+      exclude: ['/api', '/api/:rest(.*)'],
     }),
     TypeOrmModule.forRoot({
       type: 'mssql',
-      host: 'FER-DEVELOPER',
+      host: 'TUFF16\\MSSQLSERVER2019',
       port: 1433,
       username: 'CeereRips',
       password: 'crsoft',
@@ -28,9 +31,11 @@ import { DocumentoAnexoModule } from './documento-anexo/documento-anexo.module';
       },
     }),
     DocumentoAnexoModule,
+    AuthModule,
+    ContraseñasModule,
   ],
 
-  controllers: [AppController],
+  controllers: [AppController, ConsentimientosController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
