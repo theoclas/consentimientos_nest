@@ -28,7 +28,6 @@
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:linear-gradient(180deg,#f8fbff 0%, #eef5ff 60%, #e7f0ff 100%);}    
     a{color:inherit}
 
-    /* Layout */
     .app{min-height:100%;display:grid;grid-template-rows:auto 1fr;}
     header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--white);border-bottom:1px solid rgba(23,78,166,.12);box-shadow:var(--shadow)}
     header .left{display:flex;align-items:center;gap:12px}
@@ -44,7 +43,6 @@
     .panel .head h2{margin:0;font-size:1.05rem;color:var(--blue-900)}
     .panel .body{padding:16px}
 
-    /* Buscador paciente */
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .input{flex:1;min-width:220px;border:1px solid var(--gray-200);border-radius:12px;padding:12px 14px;background:#f9fbff;font-size:1rem}
     .input:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 4px rgba(43,111,242,.15);background:var(--white)}
@@ -56,7 +54,6 @@
     .label{font-size:.8rem;color:#64748b}
     .value{font-weight:700;color:#0f172a}
 
-    /* Consentimientos */
     .list{display:flex;flex-direction:column;gap:8px;max-height:460px;overflow:auto}
     .item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--gray-200);border-radius:12px;background:#fff;cursor:pointer}
     .item:hover{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(43,111,242,.15)}
@@ -64,7 +61,6 @@
 
     .hint{font-size:.88rem;color:#475569;margin-top:8px}
 
-    /* Responsive */
     @media (max-width: 980px){.content{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -84,7 +80,6 @@
     </header>
 
     <main class="content">
-      <!-- IZQUIERDA: Búsqueda de paciente -->
       <section class="panel" aria-labelledby="pacienteTitulo">
         <div class="head"><h2 id="pacienteTitulo">Paciente</h2></div>
         <div class="body">
@@ -96,7 +91,6 @@
 
           <div class="info-grid" id="infoPaciente" hidden>
             <div class="card"><div class="label">Nombre</div><div class="value" data-field="nombre"></div></div>
-            <div class="card"><div class="label">Tipo de documento</div><div class="value" data-field="tipo"></div></div>
             <div class="card"><div class="label">Número</div><div class="value" data-field="numero"></div></div>
             <div class="card"><div class="label">Celular</div><div class="value" data-field="celular"></div></div>
             <div class="card"><div class="label">Correo</div><div class="value" data-field="correo"></div></div>
@@ -104,7 +98,6 @@
         </div>
       </section>
 
-      <!-- DERECHA: Listado de consentimientos (archivos HTML) -->
       <section class="panel" aria-labelledby="consTitulo">
         <div class="head"><h2 id="consTitulo">Consentimientos disponibles</h2></div>
         <div class="body">
@@ -114,127 +107,7 @@
       </section>
     </main>
   </div>
+  <script src="js/panel.js"></script>
 
-  <script>
-    // --- Protección simple con token del login ---
-    (function ensureAuth(){
-      const token = sessionStorage.getItem('token');
-      if(!token){ window.location.href = 'index.html'; }
-    })();
-
-    document.getElementById('logoutBtn').addEventListener('click', ()=>{
-      sessionStorage.removeItem('token');
-      window.location.href = 'index.html';
-    });
-
-    // --- Buscar paciente (dummy por ahora) ---
-    const infoEl = document.getElementById('infoPaciente');
-    const fields = {
-      nombre: infoEl.querySelector('[data-field="nombre"]'),
-      tipo: infoEl.querySelector('[data-field="tipo"]'),
-      numero: infoEl.querySelector('[data-field="numero"]'),
-      celular: infoEl.querySelector('[data-field="celular"]'),
-      correo: infoEl.querySelector('[data-field="correo"]')
-    };
-
-    document.getElementById('buscarBtn').addEventListener('click', ()=>{
-      const doc = (document.getElementById('docInput').value || '').trim();
-      if(!doc){ alert('Escribe un documento para buscar.'); return; }
-      // Datos de ejemplo
-      const mock = {
-        nombre: 'Paciente de Ejemplo',
-        tipo: 'CC',
-        numero: doc,
-        celular: '+57 300 000 0000',
-        correo: 'paciente@example.com'
-      };
-      Object.entries(mock).forEach(([k,v])=> fields[k].textContent = v);
-      infoEl.hidden = false;
-    });
-
-    // --- Cargar consentimientos (busca .html en /Consentimientos/)
-    async function loadConsentimientos(){
-      const listEl = document.getElementById('consList');
-      listEl.innerHTML = '<div class="item"><span class="pill">Cargando…</span> Buscando archivos HTML…</div>';
-
-      const candidates = [];
-
-      // 0) Preferir endpoint del servidor si existe (NestJS recomendado)
-      //    GET ./consentimientos  -> ["archivo.html", ...]
-      try {
-        // Detectar prefijo global 'api' automáticamente
-        let api = await fetch('api/consentimientos', { cache: 'no-store' });
-        if (!api.ok) {
-          api = await fetch('./consentimientos', { cache: 'no-store' });
-        }
-        if (api.ok) {
-          const arr = await api.json();
-          if (Array.isArray(arr)) {
-            arr.filter(x=>/\.html?$/i.test(x)).forEach(x=>candidates.push(x));
-          }
-        }
-      } catch(e) { /* endpoint no disponible */ }
-
-      // 1) Intentar manifest.json si existe
-      if (candidates.length===0) {
-        try {
-          const r = await fetch('./Consentimientos/manifest.json', {cache: 'no-store'});
-          if(r.ok){
-            const data = await r.json();
-            if(Array.isArray(data)){
-              data.filter(x=>/\.html?$/i.test(x)).forEach(x=>candidates.push(x));
-            } else if(Array.isArray(data.files)){
-              data.files.filter(x=>/\.html?$/i.test(x)).forEach(x=>candidates.push(x));
-            }
-          }
-        } catch(e){ /* sin manifest */ }
-      }
-
-      // 2) Si no hay manifest, intentar parsear un índice de carpeta (depende del servidor)
-      if(candidates.length===0){
-        try {
-          const r = await fetch('./Consentimientos/', {cache: 'no-store'});
-          if(r.ok){
-            const html = await r.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const links = Array.from(doc.querySelectorAll('a'))
-              .map(a=>a.getAttribute('href'))
-              .filter(h=>h && /\.html?$/i.test(h));
-            links.forEach(h=>candidates.push(h.replace(/^\/.+?\//,'')));
-          }
-        } catch(e){ /* directorio sin index listing */ }
-      }
-
-      // 3) Fallback estático (ajusta nombres si quieres)
-      if(candidates.length===0){
-        candidates.push(
-          'consentimiento-procedimiento.html',
-          'consentimiento-anestesia.html',
-          'consentimiento-cirugia.html'
-        );
-      }
-
-      // Render (tener en cuenta espacios/acentos)
-      if(candidates.length){
-        listEl.innerHTML = '';
-        candidates.forEach((file)=>{
-          const display = file;
-          const href = './Consentimientos/' + encodeURIComponent(file).replace(/%2F/g,'/');
-          const item = document.createElement('div');
-          item.className = 'item';
-          item.innerHTML = `
-            <div class="pill">HTML</div>
-            <div style="font-weight:700;color:#0f172a">${display}</div>
-            <div style="margin-left:auto"><a class="btn" href="${href}" target="_blank" rel="noopener">Abrir</a></div>
-          `;
-          listEl.appendChild(item);
-        });
-      } else {
-        listEl.innerHTML = '<div class="item">No se encontraron archivos HTML en /Consentimientos/</div>';
-      }
-    }
-
-    loadConsentimientos();
-  </script>
 </body>
 </html>

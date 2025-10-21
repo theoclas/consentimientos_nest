@@ -8,12 +8,15 @@ import { DocumentoAnexoModule } from './documento-anexo/documento-anexo.module';
 import { AuthModule } from './auth/auth.module';
 import { ContraseñasModule } from './contraseñas/contraseñas.module';
 import { ConsentimientosController } from './consentimientos/consentimientos.controller';
+import { EntidadModule } from './entidad/entidad.module';
+import { EntidadiiModule } from './entidadii/entidadii.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/',
+      // exclude: ['/api*'], 
       exclude: ['/api', '/api/:rest(.*)'],
     }),
     TypeOrmModule.forRoot({
@@ -33,6 +36,8 @@ import { ConsentimientosController } from './consentimientos/consentimientos.con
     DocumentoAnexoModule,
     AuthModule,
     ContraseñasModule,
+    EntidadModule,
+    EntidadiiModule,
   ],
 
   controllers: [AppController, ConsentimientosController],
