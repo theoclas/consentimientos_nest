@@ -16,12 +16,12 @@ import { EntidadiiModule } from './entidadii/entidadii.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/',
-      // exclude: ['/api*'], 
+      // exclude: ['/api*'],
       exclude: ['/api', '/api/:rest(.*)'],
     }),
     TypeOrmModule.forRoot({
       type: 'mssql',
-      host: 'TUFF16\\MSSQLSERVER2019',
+      host: 'FER-DEVELOPER',
       port: 1433,
       username: 'CeereRips',
       password: 'crsoft',
@@ -43,4 +43,4 @@ import { EntidadiiModule } from './entidadii/entidadii.module';
   controllers: [AppController, ConsentimientosController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
