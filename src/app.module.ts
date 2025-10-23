@@ -10,6 +10,7 @@ import { ContraseñasModule } from './contraseñas/contraseñas.module';
 import { ConsentimientosController } from './consentimientos/consentimientos.controller';
 import { EntidadModule } from './entidad/entidad.module';
 import { EntidadiiModule } from './entidadii/entidadii.module';
+import { ProfesionalesModule } from './profesionales/profesionales.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { EntidadiiModule } from './entidadii/entidadii.module';
     }),
     TypeOrmModule.forRoot({
       type: 'mssql',
-      host: 'FER-DEVELOPER',
+      host: 'TUFF16\\MSSQLSERVER2019',
       port: 1433,
       username: 'CeereRips',
       password: 'crsoft',
@@ -38,6 +39,7 @@ import { EntidadiiModule } from './entidadii/entidadii.module';
     ContraseñasModule,
     EntidadModule,
     EntidadiiModule,
+    ProfesionalesModule,
   ],
 
   controllers: [AppController, ConsentimientosController],

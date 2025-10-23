@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Gestión de Consentimientos — Dinámico por nombre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; padding: 24px; background: #f6f7f9; }
+    .card { max-width: 980px; margin: 0 auto; background: #fff; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.08); padding: 20px; }
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .toolbar input, .toolbar select { padding: 8px 10px; border: 1px solid #d0d4da; border-radius: 10px; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #d0d4da; background: #fff; cursor: pointer; }
+    button.primary { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    #consentimientoContainer { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: auto; padding: 12px; }
+
+    .fallbackFirma { margin-top: 20px; padding-top: 12px; border-top: 1px dashed #9ca3af; }
+    .fallbackFirma img { max-width: 300px; display: block; border-bottom: 1px solid #111; }
+
+    .modalBack { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal { background: #fff; width: min(800px, 95vw); border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.25); padding: 16px; }
+    #lienzo { width: 100%; height: 260px; background: #f3f4f6; border: 1px dashed #9ca3af; border-radius: 8px; touch-action: none; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .no-print, .modalBack { display: none !important; }
+      body * { visibility: hidden; }
+      #consentimientoContainer, #consentimientoContainer * { visibility: visible; }
+      #consentimientoContainer { position: absolute; left: 0; top: 0; width: auto; height: auto; border: none; border-radius: 0; box-shadow: none; padding: 0; }
+      @page { margin: 16mm; size: A4; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 class="no-print" style="margin:0 0 8px;">Gestión de Consentimiento</h1>
+    <p class="no-print" style="margin:0 0 16px; color:#6b7280">
+      Define el <strong>nombre del formato</strong> y se cargará el archivo <code>./&lt;formato&gt;.html</code> en esta misma carpeta. Al imprimir, solo sale el consentimiento.
+    </p>
+
+    <div class="toolbar no-print">
+      <!-- Variable visible para el usuario -->
+      <input id="formatoNombre" type="text" placeholder="Nombre de formato (sin .html)" style="min-width:260px;" />
+      <input id="pacienteNombre" type="text" placeholder="Nombre del paciente (opcional)" />
+      <button id="btnCargar">Cargar formato</button>
+      <button id="btnFirmar" class="primary" disabled>Firmar</button>
+      <button id="btnLimpiar" disabled>Limpiar firma</button>
+      <button id="btnGuardar" disabled>Guardar</button>
+      <button id="btnImprimir" disabled>Imprimir</button>
+    </div>
+
+    <div id="consentimientoContainer" aria-label="Documento de consentimiento" data-firmado="false"></div>
+  </div>
+
+  <!-- Modal de firma -->
+  <div id="modal" class="modalBack no-print" role="dialog" aria-modal="true" aria-labelledby="tituloModal">
+    <div class="modal">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
+        <h3 id="tituloModal" style="margin:0;">Dibuja tu firma</h3>
+        <button id="btnCerrarModal">Cerrar</button>
+      </div>
+      <canvas id="lienzo"></canvas>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px;">
+        <button id="btnBorrarFirma">Limpiar</button>
+        <button id="btnAceptarFirma" class="primary">Usar firma</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= Config por variable =========
+    // Nombre por defecto del formato (SIN .html). Cambia esta constante si quieres tener un valor por defecto.
+    const FORMATO_BASE = 'consetimiento_cirugia_aplical';
+
+    // ========= Helpers =========
+    const $ = sel => document.querySelector(sel);
+    function limpiarNombreArchivo(nombre) {
+      // Evita rutas, espacios raros y extensiones maliciosas. Solo letras/números/guiones/guion_bajo y puntos.
+      return (nombre || '')
+        .trim()
+        .replace(/[^a-zA-Z0-9._-]/g, '')
+        .replace(/\.{2,}/g, '.');
+    }
+    function getParam(name) {
+      const p = new URLSearchParams(location.search);
+      return p.get(name);
+    }
+    function getForwardedSearchParams() {
+      // Reenviamos todos los params excepto "formato" al documento del consentimiento
+      const inParams = new URLSearchParams(location.search);
+      inParams.delete('formato');
+      // Además, si el usuario rellenó el nombre del paciente en el input, lo reenviamos como "nombre"
+      const n = $('#pacienteNombre')?.value?.trim();
+      if (n) inParams.set('nombre', n);
+      // Puedes añadir aquí mapeos extra: numero, celular, correo, etc., si los manejas en tu formato
+      return inParams.toString();
+    }
+
+    // ========= Estados =========
+    let firmaDataURL = null;
+    let formatoActual = null;
+
+    // Inicializar campo de formato desde la URL o constante
+    (function initFormato() {
+      const fromQuery = limpiarNombreArchivo(getParam('formato') || '');
+      const elegido = fromQuery || FORMATO_BASE;
+      $('#formatoNombre').value = elegido;
+    })();
+
+    // ========= Carga del consentimiento por nombre =========
+    async function cargarFormatoPorNombre() {
+      try {
+        const nombre = limpiarNombreArchivo($('#formatoNombre').value);
+        if (!nombre) { alert('Escribe el nombre del formato (sin .html).'); return; }
+
+        // Construimos la ruta: ./<nombre>.html
+        // Y le pasamos los mismos query params (excepto "formato") + nombre del paciente si se puso aquí
+        const extra = getForwardedSearchParams();
+        const qs = extra ? ('?' + extra) : '';
+        const ruta = `./${nombre.endsWith('.html') ? nombre : (nombre + '.html')}${qs}`;
+        formatoActual = nombre;
+
+        const resp = await fetch(ruta, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`No se pudo cargar ${ruta} (${resp.status})`);
+        const html = await resp.text();
+
+        const cont = $('#consentimientoContainer');
+        cont.innerHTML = html;
+
+        // Activar botones (Imprimir se habilita tras firmar)
+        $('#btnFirmar').disabled = false;
+        $('#btnLimpiar').disabled = false;
+        $('#btnGuardar').disabled = false;
+        $('#btnImprimir').disabled = true;
+
+        prepararLugarFirma();
+        alert(`Formato cargado: ${nombre}.html`);
+      } catch (e) {
+        console.error(e);
+        alert('No se pudo cargar el formato. Verifica el nombre y que el archivo .html esté en la misma carpeta.');
+      }
+    }
+
+    function prepararLugarFirma() {
+      const cont = $('#consentimientoContainer');
+
+      // ¿Hay placeholder explícito?
+      let imgFirma = cont.querySelector('#firmaPacienteImg, [data-firma-paciente="true"]');
+
+      // Si no, buscamos cerca de “Firma paciente” o “Firma paciente o Representante”
+      if (!imgFirma) {
+        const ancla = findByText(cont, ['Firma paciente o Representante', 'Firma paciente']);
+        if (ancla) {
+          const img = document.createElement('img');
+          img.id = 'firmaPacienteImg';
+          img.alt = 'Firma del paciente';
+          img.style.maxWidth = '300px';
+          img.style.display = 'block';
+          img.style.borderBottom = '1px solid #111';
+          img.style.marginTop = '8px';
+          ancla.insertAdjacentElement('beforebegin', img);
+          imgFirma = img;
+        }
+      }
+
+      // Si no encontramos, añadimos un bloque al final
+      if (!imgFirma) {
+        const fallback = document.createElement('div');
+        fallback.className = 'fallbackFirma';
+        fallback.innerHTML = `
+          <strong>Firma del paciente</strong><br>
+          <img id="firmaPacienteImg" alt="Firma del paciente" />
+        `;
+        cont.appendChild(fallback);
+      }
+    }
+
+    function findByText(root, texts) {
+      const set = Array.isArray(texts) ? texts : [texts];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+      while (walker.nextNode()) {
+        const t = walker.currentNode;
+        const val = (t.nodeValue || '').toLowerCase().trim();
+        if (!val) continue;
+        for (const target of set) {
+          if (val.includes(target.toLowerCase())) return t.parentElement;
+        }
+      }
+      return null;
+    }
+
+    // ========= Firma (canvas) =========
+    const modal = $('#modal');
+    const lienzo = $('#lienzo');
+    const ctx = lienzo.getContext('2d');
+    const DPR = Math.max(1, window.devicePixelRatio || 1);
+    let dibujando = false, huboTrazos = false;
+
+    function resizeCanvas() {
+      const rect = lienzo.getBoundingClientRect();
+      lienzo.width = Math.round(rect.width * DPR);
+      lienzo.height = Math.round(rect.height * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+    }
+    function pos(ev) {
+      const r = lienzo.getBoundingClientRect();
+      if (ev.touches && ev.touches[0]) return { x: ev.touches[0].clientX - r.left, y: ev.touches[0].clientY - r.top };
+      return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    }
+    function empezar(ev){ dibujando = true; huboTrazos = true; const p = pos(ev); ctx.beginPath(); ctx.moveTo(p.x, p.y); ev.preventDefault(); }
+    function seguir(ev){ if (!dibujando) return; const p = pos(ev); ctx.lineTo(p.x, p.y); ctx.stroke(); ev.preventDefault(); }
+    function terminar(){ dibujando = false; }
+
+    lienzo.addEventListener('mousedown', empezar);
+    lienzo.addEventListener('mousemove', seguir);
+    window.addEventListener('mouseup', terminar);
+    lienzo.addEventListener('touchstart', empezar, { passive: false });
+    lienzo.addEventListener('touchmove', seguir, { passive: false });
+    lienzo.addEventListener('touchend', terminar);
+
+    $('#btnFirmar').addEventListener('click', () => {
+      modal.style.display = 'flex';
+      setTimeout(() => { resizeCanvas(); limpiarCanvas(); }, 0);
+    });
+    $('#btnCerrarModal').addEventListener('click', () => { modal.style.display = 'none'; });
+
+    function limpiarCanvas() {
+      ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+      ctx.clearRect(0,0,lienzo.width,lienzo.height);
+      ctx.restore();
+      huboTrazos = false;
+      firmaDataURL = null;
+      $('#btnImprimir').disabled = true;
+    }
+    $('#btnBorrarFirma').addEventListener('click', limpiarCanvas);
+
+    $('#btnAceptarFirma').addEventListener('click', () => {
+      if (!huboTrazos) { alert('Dibuja tu firma antes de continuar.'); return; }
+
+      // Exportar a DataURL a tamaño CSS (sin DPR) para que no quede gigante al imprimir
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = lienzo.getBoundingClientRect().width;
+      exportCanvas.height = lienzo.getBoundingClientRect().height;
+      exportCanvas.getContext('2d').drawImage(lienzo, 0, 0, exportCanvas.width, exportCanvas.height);
+      firmaDataURL = exportCanvas.toDataURL('image/png');
+
+      const cont = $('#consentimientoContainer');
+      let img = cont.querySelector('#firmaPacienteImg, [data-firma-paciente="true"]');
+      if (!img) prepararLugarFirma(), img = cont.querySelector('#firmaPacienteImg, [data-firma-paciente="true"]');
+      if (img) img.src = firmaDataURL;
+
+      cont.dataset.firmado = 'true';
+      $('#btnImprimir').disabled = false;
+      modal.style.display = 'none';
+      alert('Firma insertada en el consentimiento.');
+    });
+
+    // ========= Botones =========
+    $('#btnCargar').addEventListener('click', cargarFormatoPorNombre);
+
+    $('#btnLimpiar').addEventListener('click', () => {
+      const img = $('#consentimientoContainer').querySelector('#firmaPacienteImg, [data-firma-paciente="true"]');
+      if (img) img.removeAttribute('src');
+      $('#consentimientoContainer').dataset.firmado = 'false';
+      firmaDataURL = null;
+      $('#btnImprimir').disabled = true;
+    });
+
+    $('#btnGuardar').addEventListener('click', async () => {
+      const cont = $('#consentimientoContainer');
+      if (!cont.innerHTML.trim()) { alert('Primero carga un formato.'); return; }
+
+      const payload = {
+        formato: formatoActual ? (formatoActual + '.html') : null,
+        paciente: $('#pacienteNombre').value || null,
+        fecha_iso: new Date().toISOString(),
+        firma_png: firmaDataURL || null,
+        html_consentimiento_firmado: cont.outerHTML
+      };
+      console.log('Payload listo para enviar al backend:', payload);
+      alert('Simulación: consentimiento preparado para guardar (ver consola).');
+      // await fetch('/api/consentimientos', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+    });
+
+    $('#btnImprimir').addEventListener('click', () => {
+      const firmado = $('#consentimientoContainer').dataset.firmado === 'true';
+      if (!firmado) { alert('Primero inserta la firma.'); return; }
+      window.print();
+    });
+
+    // ========= Carga automática si hay ?formato=... =========
+    window.addEventListener('load', () => {
+      if (getParam('formato')) cargarFormatoPorNombre();
+    });
+    window.addEventListener('resize', () => { if (modal.style.display === 'flex') resizeCanvas(); });
+  </script>
+</body>
+</html>
