@@ -32,6 +32,8 @@
   const numero  = params.get('numero')  || '';
   const celular = params.get('celular') || '';
   const correo  = params.get('correo')  || '';
+  const profDocumento  = params.get('profDocumento')  || '';
+  const profNombre  = params.get('profNombre')  || '';
 
   // Ejemplo: pintar en campos
 //   document.getElementById('pacienteNombre')?.textContent = nombre;
@@ -40,6 +42,9 @@
 //   document.getElementById('T1').textContent = nombre;
   function toggle(){
 	 document.getElementById('T1').value = nombre;
+	 document.getElementById('T5').value = numero;
+	 document.getElementById('T29').value = profNombre;
+	//  document.getElementById('T6t').value = profDocumento;
   }
 
   // ...

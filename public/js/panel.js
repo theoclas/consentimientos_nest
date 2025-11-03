@@ -328,13 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Selecciona un consentimiento de la lista.');
       return;
     }
-    console.log("Profesional seleccionado para cargar consentimiento:", selectEl.value);
-    console.log("profe", selectEl.value.trim());
     
-    if (selectEl.value && selectEl.value.trim() == '') {
-      alert('Selecciona un profesional de la lista.');
-      return;
-    }
      if (!selectEl.value.trim()) {
       alert('Selecciona un profesional de la lista.');
       return;
@@ -353,11 +347,18 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Primero busca y carga un paciente para enviar sus datos al consentimiento.');
       return null;
     }
+
+    const selectEl = document.getElementById('profSelect');
+    const profDocumento = selectEl.value;
+    const profNombre = selectEl.options[selectEl.selectedIndex]?.text;
     const qs = new URLSearchParams({
       nombre: paciente.nombre || '',
+      // nombre: paciente.nombre || '',
       numero: paciente.numero || '',
       celular: paciente.celular || '',
       correo: paciente.correo || '',
+      profDocumento: profDocumento || '',
+      profNombre: profNombre || '',
     }); // esto ya lo hacías en tu versión previa al abrir en una pestaña nueva :contentReference[oaicite:3]{index=3}
     return `${baseHref}?${qs.toString()}`;
   }
