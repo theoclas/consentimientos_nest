@@ -138,103 +138,103 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  $('#saveBtn')?.addEventListener('click', async () => {
-    const frame = document.querySelector('#viewer');
-    if (!frame?.contentDocument || !frame.contentWindow) {
-      alert('No hay documento cargado.');
-      return;
-    }
+  // $('#saveBtn')?.addEventListener('click', async () => {
+  //   const frame = document.querySelector('#viewer');
+  //   if (!frame?.contentDocument || !frame.contentWindow) {
+  //     alert('No hay documento cargado.');
+  //     return;
+  //   }
 
-    const w = frame.contentWindow;
-    const srcDoc = frame.contentDocument;
+  //   const w = frame.contentWindow;
+  //   const srcDoc = frame.contentDocument;
 
-    // 1) Clonamos el documento para no tocar lo que ve el usuario
-    const cloneEl = srcDoc.documentElement.cloneNode(true);
+  //   // 1) Clonamos el documento para no tocar lo que ve el usuario
+  //   const cloneEl = srcDoc.documentElement.cloneNode(true);
 
-    // 2) CANVAS → IMG (firma dibujada)
-    {
-      const origCanvases = Array.from(srcDoc.querySelectorAll('canvas'));
-      const cloneCanvases = Array.from(cloneEl.querySelectorAll('canvas'));
-      origCanvases.forEach((orig, i) => {
-        try {
-          const dataUrl = orig.toDataURL('image/png'); // píxeles de la firma
-          const cloneNode = cloneCanvases[i];
-          if (!cloneNode) return;
+  //   // 2) CANVAS → IMG (firma dibujada)
+  //   {
+  //     const origCanvases = Array.from(srcDoc.querySelectorAll('canvas'));
+  //     const cloneCanvases = Array.from(cloneEl.querySelectorAll('canvas'));
+  //     origCanvases.forEach((orig, i) => {
+  //       try {
+  //         const dataUrl = orig.toDataURL('image/png'); // píxeles de la firma
+  //         const cloneNode = cloneCanvases[i];
+  //         if (!cloneNode) return;
 
-          const img = cloneEl.ownerDocument.createElement('img');
-          img.src = dataUrl;
-          img.alt = cloneNode.getAttribute?.('alt') || 'Firma';
-          // copiar tamaño/estilos/clases
-          if (cloneNode.getAttribute) img.setAttribute('style', cloneNode.getAttribute('style') || '');
-          if (cloneNode.className) img.className = cloneNode.className;
-          if (orig.width) img.width = orig.width;
-          if (orig.height) img.height = orig.height;
+  //         const img = cloneEl.ownerDocument.createElement('img');
+  //         img.src = dataUrl;
+  //         img.alt = cloneNode.getAttribute?.('alt') || 'Firma';
+  //         // copiar tamaño/estilos/clases
+  //         if (cloneNode.getAttribute) img.setAttribute('style', cloneNode.getAttribute('style') || '');
+  //         if (cloneNode.className) img.className = cloneNode.className;
+  //         if (orig.width) img.width = orig.width;
+  //         if (orig.height) img.height = orig.height;
 
-          cloneNode.replaceWith(img);
-        } catch { /* canvas tainted o sin firma: ignorar */ }
-      });
-    }
+  //         cloneNode.replaceWith(img);
+  //       } catch { /* canvas tainted o sin firma: ignorar */ }
+  //     });
+  //   }
 
-    // 3) IMG blob:/relativas → data:/absolutas
-    {
-      const imgs = Array.from(cloneEl.querySelectorAll('img'));
-      for (const img of imgs) {
-        let src = img.getAttribute('src') || '';
-        try {
-          if (!src) continue;
+  //   // 3) IMG blob:/relativas → data:/absolutas
+  //   {
+  //     const imgs = Array.from(cloneEl.querySelectorAll('img'));
+  //     for (const img of imgs) {
+  //       let src = img.getAttribute('src') || '';
+  //       try {
+  //         if (!src) continue;
 
-          // a) blob: → data:
-          if (src.startsWith('blob:')) {
-            const blob = await w.fetch(src).then(r => r.blob());
-            const dataUrl = await new Promise((resolve) => {
-              const fr = new w.FileReader();
-              fr.onloadend = () => resolve(fr.result);
-              fr.readAsDataURL(blob);
-            });
-            img.setAttribute('src', dataUrl);
-          }
-          // b) relativas → absolutas (para que Puppeteer las cargue)
-          else if (src.startsWith('/')) {
-            img.setAttribute('src', `${location.origin}${src}`);
-          }
-        } catch {
-          // si algo falla, dejamos el src como está
-        }
-      }
-    }
+  //         // a) blob: → data:
+  //         if (src.startsWith('blob:')) {
+  //           const blob = await w.fetch(src).then(r => r.blob());
+  //           const dataUrl = await new Promise((resolve) => {
+  //             const fr = new w.FileReader();
+  //             fr.onloadend = () => resolve(fr.result);
+  //             fr.readAsDataURL(blob);
+  //           });
+  //           img.setAttribute('src', dataUrl);
+  //         }
+  //         // b) relativas → absolutas (para que Puppeteer las cargue)
+  //         else if (src.startsWith('/')) {
+  //           img.setAttribute('src', `${location.origin}${src}`);
+  //         }
+  //       } catch {
+  //         // si algo falla, dejamos el src como está
+  //       }
+  //     }
+  //   }
 
-    // 4) HTML final con DOCTYPE
-    const html = '<!DOCTYPE html>\n' + cloneEl.outerHTML;
+  //   // 4) HTML final con DOCTYPE
+  //   const html = '<!DOCTYPE html>\n' + cloneEl.outerHTML;
 
-    // 5) Datos del paciente
-    const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
-    const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
+  //   // 5) Datos del paciente
+  //   const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
+  //   const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
 
-    try {
-      const resp = await fetch('/api/consentimientos/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          html,
-          pacienteNombre: nombre,
-          pacienteDoc: doc,
-          descripcion: 'Consentimiento firmado'
-        })
-      });
+  //   try {
+  //     const resp = await fetch('/api/consentimientos/pdf', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         html,
+  //         pacienteNombre: nombre,
+  //         pacienteDoc: doc,
+  //         descripcion: 'Consentimiento firmado'
+  //       })
+  //     });
 
-      if (!resp.ok) throw new Error(await resp.text());
-      const json = await resp.json();
+  //     if (!resp.ok) throw new Error(await resp.text());
+  //     const json = await resp.json();
 
-      const msg = `✅ PDF guardado.\n\nRuta: ${json.filePath}\nID: ${json.anexoId}`;
-      // if (confirm(msg + '\n\n¿Abrir PDF ahora?')) {
-      //   window.open(`/api/consentimientos/pdf/${json.anexoId}`, '_blank');
-      // }
-      confirm(msg)
-      // alert('El PDF se ha guardado correctamente en el servidor.\n\n ', msg);
-    } catch (e) {
-      alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
-    }
-  });
+  //     const msg = `✅ PDF guardado.\n\nRuta: ${json.filePath}\nID: ${json.anexoId}`;
+  //     // if (confirm(msg + '\n\n¿Abrir PDF ahora?')) {
+  //     //   window.open(`/api/consentimientos/pdf/${json.anexoId}`, '_blank');
+  //     // }
+  //     confirm(msg)
+  //     // alert('El PDF se ha guardado correctamente en el servidor.\n\n ', msg);
+  //   } catch (e) {
+  //     alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
+  //   }
+  // });
 
 
 
@@ -762,5 +762,114 @@ document.addEventListener('DOMContentLoaded', () => {
   // }
 })();
 
+
+
+const saveBtn = document.getElementById('saveBtn');
+
+function setSaving(saving) {
+  if (!saveBtn) return;
+  saveBtn.disabled = saving;
+  saveBtn.classList.toggle('is-loading', saving);
+  saveBtn.setAttribute('aria-busy', saving ? 'true' : 'false');
+  const label = saveBtn.querySelector('.btn__label');
+  if (label) {
+    if (saving) {
+      label.dataset.text = label.textContent;
+      label.textContent = 'Guardando…';
+    } else {
+      label.textContent = label.dataset.text || 'Guardar';
+    }
+  }
+}
+
+saveBtn?.addEventListener('click', async () => {
+  setSaving(true);
+  try {
+    const frame = document.querySelector('#viewer');
+    if (!frame?.contentDocument || !frame.contentWindow) {
+      alert('No hay documento cargado.');
+      return;
+    }
+
+    const w = frame.contentWindow;
+    const srcDoc = frame.contentDocument;
+
+    const cloneEl = srcDoc.documentElement.cloneNode(true);
+
+    // 2) CANVAS → IMG (firma dibujada)
+    {
+      const origCanvases = Array.from(srcDoc.querySelectorAll('canvas'));
+      const cloneCanvases = Array.from(cloneEl.querySelectorAll('canvas'));
+      origCanvases.forEach((orig, i) => {
+        try {
+          const dataUrl = orig.toDataURL('image/png');
+          const cloneNode = cloneCanvases[i];
+          if (!cloneNode) return;
+
+          const img = cloneEl.ownerDocument.createElement('img');
+          img.src = dataUrl;
+          img.alt = cloneNode.getAttribute?.('alt') || 'Firma';
+          if (cloneNode.getAttribute) img.setAttribute('style', cloneNode.getAttribute('style') || '');
+          if (cloneNode.className) img.className = cloneNode.className;
+          if (orig.width) img.width = orig.width;
+          if (orig.height) img.height = orig.height;
+
+          cloneNode.replaceWith(img);
+        } catch { /* canvas tainted o sin firma: ignorar */ }
+      });
+    }
+
+    // 3) IMG blob:/relativas → data:/absolutas
+    {
+      const imgs = Array.from(cloneEl.querySelectorAll('img'));
+      for (const img of imgs) {
+        let src = img.getAttribute('src') || '';
+        try {
+          if (!src) continue;
+          if (src.startsWith('blob:')) {
+            const blob = await w.fetch(src).then(r => r.blob());
+            const dataUrl = await new Promise((resolve) => {
+              const fr = new w.FileReader();
+              fr.onloadend = () => resolve(fr.result);
+              fr.readAsDataURL(blob);
+            });
+            img.setAttribute('src', dataUrl);
+          } else if (src.startsWith('/')) {
+            img.setAttribute('src', `${location.origin}${src}`);
+          }
+        } catch { /* si falla, mantener src */ }
+      }
+    }
+
+    // 4) HTML final con DOCTYPE
+    const html = '<!DOCTYPE html>\n' + cloneEl.outerHTML;
+
+    // 5) Datos del paciente
+    const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
+    const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
+
+    const resp = await fetch('/api/consentimientos/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        html,
+        pacienteNombre: nombre,
+        pacienteDoc: doc,
+        descripcion: 'Consentimiento firmado'
+      })
+    });
+
+    if (!resp.ok) throw new Error(await resp.text());
+    const json = await resp.json();
+
+    const msg = `✅ PDF guardado.\n\nRuta: ${json.filePath}\nID: ${json.anexoId}`;
+    confirm(msg);
+    // window.open(`/api/consentimientos/pdf/${json.anexoId}`, '_blank');
+  } catch (e) {
+    alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
+  } finally {
+    setSaving(false);
+  }
+});
 
 
