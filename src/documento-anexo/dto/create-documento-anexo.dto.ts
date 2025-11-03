@@ -43,4 +43,6 @@ export class CreateDocumentoAnexoDto {
   @IsString()
   @MaxLength(250)
   rutaCarpeta?: string;
+
+
 }

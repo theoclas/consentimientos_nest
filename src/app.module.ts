@@ -11,6 +11,9 @@ import { ConsentimientosController } from './consentimientos/consentimientos.con
 import { EntidadModule } from './entidad/entidad.module';
 import { EntidadiiModule } from './entidadii/entidadii.module';
 import { ProfesionalesModule } from './profesionales/profesionales.module';
+import { FirmasModule } from './firmas/firmas.module';
+import { ConsentimientosModule } from './consentimientos/consentimientos.module';
+import { DocumentoAnexoArchivoModule } from './documento-anexo-archivo/documento-anexo-archivo.module';
 
 @Module({
   imports: [
@@ -18,6 +21,7 @@ import { ProfesionalesModule } from './profesionales/profesionales.module';
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/',
       // exclude: ['/api*'],
+      // exclude: ['/api', '/api/:rest(.*)'],
       exclude: ['/api', '/api/:rest(.*)'],
     }),
     TypeOrmModule.forRoot({
@@ -40,6 +44,9 @@ import { ProfesionalesModule } from './profesionales/profesionales.module';
     EntidadModule,
     EntidadiiModule,
     ProfesionalesModule,
+    FirmasModule,
+    ConsentimientosModule,
+    DocumentoAnexoArchivoModule,
   ],
 
   controllers: [AppController, ConsentimientosController],

@@ -18,8 +18,15 @@ export class DocumentoAnexo {
   })
   descripcionDocumentoAnexo?: string;
 
-  @Column('datetime', { name: 'Fecha Documento Anexo', nullable: true })
-  fechaDocumentoAnexo?: Date;
+  // @Column('datetime', { name: 'Fecha Documento Anexo', nullable: true })
+  // fechaDocumentoAnexo?: Date;
+
+  @Column('datetime', {
+    name: 'Fecha Documento Anexo',
+    nullable: false,
+    default: () => 'GETDATE()'
+  })
+  fechaDocumentoAnexo!: Date;
 
   @Column('nvarchar', { name: 'Documento Empresa', length: 50, nullable: true })
   documentoEmpresa?: string;
@@ -32,4 +39,7 @@ export class DocumentoAnexo {
 
   @Column('nvarchar', { name: 'RutaCarpeta', length: 250, nullable: true })
   rutaCarpeta?: string;
+
+
+
 }
