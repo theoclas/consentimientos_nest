@@ -136,54 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#signBtn')?.addEventListener('click', () => {
     // alert('Firmar: pendiente de implementar. Aquí invocaremos el flujo de firma.');
   });
-  // $('#saveBtn')?.addEventListener('click', () => {
-  //   alert('Guardar: pendiente de implementar. Aquí enviaremos el HTML firmado al backend.');
-
-  // });
-
-  //   $('#saveBtn')?.addEventListener('click', async () => {
-  //     const frame = document.querySelector('#viewer');
-  //     if (!frame?.contentDocument) {
-  //       alert('No hay documento cargado.');
-  //       return;
-  //     }
-
-  //     // Añadimos DOCTYPE para que el PDF respete estilos
-  //     const html = '<!DOCTYPE html>\n' + frame.contentDocument.documentElement.outerHTML;
-
-  //     const nombre = frame.contentDocument.getElementById('T1')?.value || 'paciente';
-  //     const doc = frame.contentDocument.getElementById('T5')?.value || 'sin_doc';
-
-  //     try {
-  //       const resp = await fetch('/api/consentimientos/pdf', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({
-  //           html,
-  //           pacienteNombre: nombre,
-  //           pacienteDoc: doc,
-  //           descripcion: 'Consentimiento firmado'
-  //         })
-  //       });
-
-  //       if (!resp.ok) throw new Error(await resp.text());
-  //       const json = await resp.json();
-
-  //       const msg = `✅ PDF guardado correctamente.
-
-  // 📂 Ruta local: 
-  // ${json.filePath}
-
-  // 🆔 Registro documento: ${json.anexoId}`;
-
-  //       if (confirm(msg + "\n\n¿Desea abrir el PDF?")) {
-  //         window.open(`/api/consentimientos/pdf/${json.anexoId}`, "_blank");
-  //       }
-
-  //     } catch (e) {
-  //       alert('❌ No se pudo guardar: ' + (e?.message || String(e)));
-  //     }
-  //   });
 
 
   $('#saveBtn')?.addEventListener('click', async () => {
@@ -274,9 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await resp.json();
 
       const msg = `✅ PDF guardado.\n\nRuta: ${json.filePath}\nID: ${json.anexoId}`;
-      if (confirm(msg + '\n\n¿Abrir PDF ahora?')) {
-        window.open(`/api/consentimientos/pdf/${json.anexoId}`, '_blank');
-      }
+      // if (confirm(msg + '\n\n¿Abrir PDF ahora?')) {
+      //   window.open(`/api/consentimientos/pdf/${json.anexoId}`, '_blank');
+      // }
+      confirm(msg)
+      // alert('El PDF se ha guardado correctamente en el servidor.\n\n ', msg);
     } catch (e) {
       alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
     }
@@ -777,35 +731,35 @@ document.addEventListener('DOMContentLoaded', () => {
     return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
   }
 
-  const saveBtn = $('#saveBtn');
-  if (saveBtn && !saveBtn.dataset.saveBound) {
-    saveBtn.dataset.saveBound = '1';
-    saveBtn.addEventListener('click', async () => {
-      try {
-        const html = await getIframeHtml();
-        const { nombre, doc } = getPacienteFromIframe();
+  // const saveBtn = $('#saveBtn');
+  // if (saveBtn && !saveBtn.dataset.saveBound) {
+  //   saveBtn.dataset.saveBound = '1';
+  //   saveBtn.addEventListener('click', async () => {
+  //     try {
+  //       const html = await getIframeHtml();
+  //       const { nombre, doc } = getPacienteFromIframe();
 
-        const resp = await fetch('/api/consentimientos/pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            html,                      // HTML completo
-            pacienteNombre: nombre,
-            pacienteDoc: doc,
-            descripcion: 'Consentimiento firmado'
-          })
-        });
-        if (!resp.ok) throw new Error(await resp.text() || 'Error generando PDF');
-        const json = await resp.json();
-        // { filePath: 'C:\\CeereSio\\Documentos\\consentimiento_123_2025-11-03_10-22.pdf', anexoId: 1234 }
+  //       const resp = await fetch('/api/consentimientos/pdf', {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify({
+  //           html,                      // HTML completo
+  //           pacienteNombre: nombre,
+  //           pacienteDoc: doc,
+  //           descripcion: 'Consentimiento firmado'
+  //         })
+  //       });
+  //       if (!resp.ok) throw new Error(await resp.text() || 'Error generando PDF');
+  //       const json = await resp.json();
+  //       // { filePath: 'C:\\CeereSio\\Documentos\\consentimiento_123_2025-11-03_10-22.pdf', anexoId: 1234 }
 
-        alert('PDF guardado en:\n' + json.filePath + (json.anexoId ? `\n(DocumentoAnexo #${json.anexoId} creado)` : ''));
-      } catch (e) {
-        console.error(e);
-        alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
-      }
-    });
-  }
+  //       alert('PDF guardado en:\n' + json.filePath + (json.anexoId ? `\n(DocumentoAnexo #${json.anexoId} creado)` : ''));
+  //     } catch (e) {
+  //       console.error(e);
+  //       alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
+  //     }
+  //   });
+  // }
 })();
 
 
