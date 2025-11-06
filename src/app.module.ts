@@ -15,7 +15,8 @@ import { FirmasModule } from './firmas/firmas.module';
 import { ConsentimientosModule } from './consentimientos/consentimientos.module';
 import { DocumentoAnexoArchivoModule } from './documento-anexo-archivo/documento-anexo-archivo.module';
 import { EmpresasModule } from './empresas/empresas.module';
-import { EvaluacionentidadModule } from './evaluacionentidad/evaluacionentidad.module';
+import { EvaluacionentidadModule } from './evaluacionentidad/evaluacionentidad.module'; 
+import { CnstaNestPacientesFormulaModule } from './cnsta-nest-pacientes-formula/cnsta-nest-pacientes-formula.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { EvaluacionentidadModule } from './evaluacionentidad/evaluacionentidad.m
     ConsentimientosModule,
     DocumentoAnexoArchivoModule,
     EmpresasModule,
-    EvaluacionentidadModule,
+    EvaluacionentidadModule, 
+    CnstaNestPacientesFormulaModule,
   ],
 
   controllers: [AppController, ConsentimientosController],

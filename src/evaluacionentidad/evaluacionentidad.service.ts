@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEvaluacionentidadDto } from './dto/create-evaluacionentidad.dto';
-import { UpdateEvaluacionentidadDto } from './dto/update-evaluacionentidad.dto';
+// import { UpdateEvaluacionentidadDto } from './dto/update-evaluacionentidad.dto';
 import { Repository } from 'typeorm';
 import { Evaluacionentidad } from './entities/evaluacionentidad.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class EvaluacionentidadService {
   constructor(
+    @InjectRepository(Evaluacionentidad)
     private readonly evaluacionentidadRepository: Repository<Evaluacionentidad>,
   ) { }
   async create(createEvaluacionentidadDto: CreateEvaluacionentidadDto) {
@@ -19,7 +21,7 @@ export class EvaluacionentidadService {
   }
 
   async findOne(idEvaluacionEntidad: number) {
-    return await this.evaluacionentidadRepository.findOneBy({ idEvaluacionEntidad: idEvaluacionEntidad })  ;
+    return await this.evaluacionentidadRepository.findOneBy({ idEvaluacionEntidad: idEvaluacionEntidad });
   }
 
   // async update(id: number, updateEvaluacionentidadDto: UpdateEvaluacionentidadDto) {

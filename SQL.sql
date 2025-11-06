@@ -21,3 +21,21 @@ ON DELETE CASCADE;
 ALTER TABLE [Documento Anexo]
 ADD CONSTRAINT DF_DocumentoAnexo_Fecha
 DEFAULT GETDATE() FOR [Fecha Documento Anexo];
+
+
+CREATE VIEW [dbo].[Cnsta nest Pacientes Formula]
+AS
+SELECT dbo.Entidad.[Documento Entidad], dbo.EntidadIII.[Edad EntidadIII], dbo.EntidadII.[Dirección EntidadII], dbo.EntidadII.[Id Ciudad], dbo.Ciudad.Ciudad, dbo.EntidadII.[Teléfono No 1 EntidadII], dbo.EntidadII.[Teléfono No 2 EntidadII], 
+                  dbo.EntidadII.[Teléfono Celular EntidadII], dbo.EntidadIII.[Fecha Nacimiento EntidadIII], dbo.EntidadIII.[Id Unidad de Medida Edad], dbo.EntidadIII.[Id Sexo], dbo.Sexo.Sexo, dbo.EntidadIII.[Id Estado Civil], dbo.[Estado Civil].[Estado Civil], 
+                  dbo.Sexo.[Descripción Sexo]
+FROM     dbo.Entidad INNER JOIN
+                  dbo.EntidadII ON dbo.Entidad.[Documento Entidad] = dbo.EntidadII.[Documento Entidad] INNER JOIN
+                  dbo.EntidadIII ON dbo.Entidad.[Documento Entidad] = dbo.EntidadIII.[Documento Entidad] INNER JOIN
+                  dbo.Ciudad ON dbo.EntidadII.[Id Ciudad] = dbo.Ciudad.[Id Ciudad] INNER JOIN
+                  dbo.Sexo ON dbo.EntidadIII.[Id Sexo] = dbo.Sexo.[Id Sexo] INNER JOIN
+                  dbo.[Estado Civil] ON dbo.EntidadIII.[Id Estado Civil] = dbo.[Estado Civil].[Id Estado Civil]
+GO
+
+
+
+

@@ -18,15 +18,6 @@ export class Evaluacionentidad {
   @Column({ name: 'Edad Entidad Evaluación Entidad', type: 'int', nullable: true })
   edadEntidadEvaluacion: number;
 
-  @Column({ name: 'Acompañante Evaluación Entidad', type: 'nvarchar', length: 200, nullable: true })
-  acompananteEvaluacion: string;
-
-  @Column({ name: 'Id Parentesco', type: 'int', nullable: true })
-  idParentesco: number;
-
-  @Column({ name: 'Teléfono Acompañante', type: 'nvarchar', length: 50, nullable: true })
-  telefonoAcompanante: string;
-
   @Column({ name: 'Diagnóstico General Evaluación Entidad', type: 'ntext', nullable: true })
   diagnosticoGeneral: string;
 
@@ -60,15 +51,6 @@ export class Evaluacionentidad {
   @Column({ name: 'Id Estado Civil', type: 'int', nullable: true })
   idEstadoCivil: number;
 
-  @Column({ name: 'Id Ocupación', type: 'int', nullable: true })
-  idOcupacion: number;
-
-  @Column({ name: 'Documento Aseguradora', type: 'nvarchar', length: 50, nullable: true })
-  documentoAseguradora: string;
-
-  @Column({ name: 'Id Tipo de Afiliado', type: 'int', nullable: true })
-  idTipoAfiliado: number;
-
   @Column({ name: 'Responsable Evaluación Entidad', type: 'nvarchar', length: 250, nullable: true })
   responsableEvaluacion: string;
 
@@ -90,6 +72,5 @@ export class Evaluacionentidad {
   @Column({ name: 'Documento Profesional', type: 'nvarchar', length: 50, nullable: true })
   documentoProfesional: string;
 
-  @Column({ name: 'Firma Evaluación Entidad', type: 'nvarchar', length: 250, nullable: true })
-  firmaEvaluacion: string;
+
 }
