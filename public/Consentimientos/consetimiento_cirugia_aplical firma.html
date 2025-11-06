@@ -36,6 +36,8 @@
 	const correo = params.get('correo') || '';
 	const profDocumento = params.get('profDocumento') || '';
 	const profNombre = params.get('profNombre') || '';
+	const EmpDocumento = params.get('EmpDocumento') || '';
+	const EmpNombre = params.get('EmpNombre') || '';
 
 	// Ejemplo: pintar en campos
 	//   document.getElementById('pacienteNombre')?.textContent = nombre;
@@ -46,6 +48,7 @@
 		document.getElementById('T1').value = nombre;
 		document.getElementById('T5').value = numero;
 		document.getElementById('T29').value = profNombre;
+		document.getElementById('Entidad3').src =  `../FirmasProfesionales/${profDocumento}.png`;
 		//  document.getElementById('T6t').value = profDocumento;
 	}
 
@@ -363,15 +366,16 @@
 						</tr>
 						<tr>
 							<td colspan="4"><!-- Botón para abrir el modal de firma -->
-								<button id="btnFirmarPaciente" type="button" style="margin-top:10px;">Firmar</button>
-
+								
 								<!-- Imagen de la firma del paciente (se completa al guardar) -->
 								<div style="margin-top:8px;">
 									<img id="firmaPaciente" alt="Firma del paciente"
 										style="width:260px;height:120px;object-fit:contain;border:1px dashed #999;" />
 								</div>
 							</td>
-							<td colspan="2"><img name="Entidad3" src="FirmaEntidad.jpg" style="width: 260px; height: 120px;"></td>
+							<!-- <td colspan="2"><img name="Entidad3" src="FirmaEntidad.jpg" style="width: 260px; height: 120px;"></td> -->
+							<td colspan="2"><img name="Entidad3" id="Entidad3" src="" style="width: 260px; height: 120px;"></td>
+							<!-- <td colspan="2"><img name="Entidad3" id="Entidad3" src="" style="width: 260px; height: 120px;"></td> -->
 						</tr>
 
 

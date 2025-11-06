@@ -264,13 +264,20 @@
         <img src="./IMG/Logo_Ceere.jpg" alt="Logo Ceere">
         <div class="title">
           <span class="brand">Ceere Software</span>
-          <span class="sub">Panel de Consentimientos</span>
+          <span class="sub">Panel de Inicio</span>
         </div>
       </div>
+
       <button class="btn small" id="logoutBtn">Salir</button>
     </header>
 
     <main>
+      <div>
+        <section>
+          <button class="btn small" id="FormulaMedicaBtn">Formula Medica</button>
+
+        </section>
+      </div>
       <!-- parte superior -->
       <div class="top-panels">
         <section class="panel">
@@ -314,6 +321,9 @@
           <div class="body">
             <div class="list" id="consList"></div>
             <p class="hint">Los archivos se leen desde la carpeta <b>/Consentimientos/</b>.</p>
+            <div class="row" style="margin-top:12px;">
+              <select id="EmpresasSelect"></select>
+            </div>
             <div class="row" style="margin-top:12px;">
               <select id="profSelect"></select>
             </div>

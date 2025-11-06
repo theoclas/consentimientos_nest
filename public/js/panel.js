@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Visor (ya integrado en el HTML)
   function openInViewer(href, title) {
+
     const wrap = $('#viewerWrap');
     if (!wrap) {
       alert('No se encontró el contenedor del visor.');
@@ -115,11 +116,125 @@ document.addEventListener('DOMContentLoaded', () => {
     const openNew = $('#openNew');
 
     frame.src = href;
+    frame.onload = () => {
+      try {
+        fillConsentFieldsInIframe(frame);
+      } catch (e) {
+        console.warn('No se pudieron rellenar campos en el iframe:', e);
+      }
+    };
     viewerTitle.textContent = title || 'Vista previa';
     openNew.href = href;
     wrap.hidden = false;
     wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
+  const CONS_FIELDS = {
+    T1: (ctx) => ctx.paciente?.nombre ?? '',
+    T2: (ctx) => ctx.paciente?.noHistoria ?? '',         // si tienes ese dato
+    T3: (ctx) => ctx.paciente?.edad ?? '',
+    T4: (ctx) => ctx.paciente?.fechaHistoria ?? '',
+    T5: (ctx) => ctx.paciente?.numero ?? '',
+    T6: (ctx) => ctx.paciente?.direccion ?? '',
+    T7: (ctx) => ctx.paciente?.ciudad ?? '',
+    T8: (ctx) => ctx.paciente?.telDomicilio ?? '',
+    T9: (ctx) => ctx.paciente?.fechaNacimiento ?? '',
+    T10: (ctx) => ctx.paciente?.sexo ?? '',
+    T11: (ctx) => ctx.paciente?.estadoCivil ?? '',
+    T12: (ctx) => ctx.paciente?.ocupacion ?? '',
+    T13: (ctx) => ctx.paciente?.aseguradora ?? '',
+    T14: (ctx) => ctx.paciente?.tipoVinculacion ?? '',
+    T15: (ctx) => ctx.paciente?.acompanante ?? '',
+    T16: (ctx) => ctx.paciente?.parentescoAcompanante ?? '',
+    T17: (ctx) => ctx.paciente?.telAcompanante ?? '',
+    T18: (ctx) => ctx.paciente?.responsable ?? '',
+    T19: (ctx) => ctx.paciente?.parentescoResponsable ?? '',
+    T20: (ctx) => ctx.paciente?.telResponsable ?? '',
+    T21: (ctx) => ctx.usuarioActual ?? '',
+    T22: (ctx) => ctx.paciente?.horaHistoria ?? '',
+    T23: (ctx) => ctx.paciente?.lugarNacimiento ?? '',
+    T24: (ctx) => ctx.paciente?.barrio ?? '',
+    T25: (ctx) => ctx.paciente?.telefono2 ?? '',
+    T26: (ctx) => ctx.paciente?.celular ?? '',
+    T27: (ctx) => ctx.paciente?.tipoDocumento ?? '',
+    T28: (ctx) => ctx.paciente?.tipoUsuario ?? '',
+    T29: (ctx) => ctx.profesional?.registroMedico ?? '',   // Registro Médico
+    T30: (ctx) => ctx.paciente?.fechaHistoriaNumerica ?? '',
+    T31: (ctx) => ctx.rips?.codigo1 ?? '',
+    T32: (ctx) => ctx.rips?.descripcion1 ?? '',
+    T33: (ctx) => ctx.rips?.codigo2 ?? '',
+    T34: (ctx) => ctx.paciente?.edadGestacional ?? '',
+    T36: (ctx) => ctx.paciente?.correo ?? '',
+
+    // Entidad1: foto del paciente (img)
+    // Entidad2: firma del paciente (img) -> la setea tu flujo de firma
+    // Entidad3: firma del profesional (img)
+  };
+
+  // Devuelve el "contexto" (datos) desde tu UI para rellenar el iframe
+  function buildConsentContext() {
+    const paciente = getPacienteBasics(); // ya la tienes
+    const profSel = document.getElementById('profSelect');
+    const profDocumento = profSel?.value || '';
+    const profNombre = profSel?.options[profSel.selectedIndex]?.text || '';
+
+    const ctx = {
+      paciente: {
+        nombre: paciente?.nombre || '',
+        numero: paciente?.numero || '',
+        celular: paciente?.celular || '',
+        correo: paciente?.correo || '',
+        // agrega aquí cualquier otro campo si lo tienes disponible
+      },
+      profesional: {
+        documento: profDocumento,
+        nombre: profNombre,
+        registroMedico: '', // si lo traes de tu endpoint de profesionales, setéalo
+      },
+      usuarioActual: '', // si manejas el user logueado
+      rips: {},          // si manejas codigos rips
+    };
+    return ctx;
+  }
+
+  // Rellena inputs/textarea/select por ID (T1..T36) y pone la firma del profesional en Entidad3
+  function fillConsentFieldsInIframe(frame) {
+    if (!frame?.contentDocument) return;
+    const doc = frame.contentDocument;
+    const ctx = buildConsentContext();
+
+    // 1) Campos T*
+    Object.entries(CONS_FIELDS).forEach(([id, getter]) => {
+      if (id.startsWith('T')) {
+        const el = doc.getElementById(id);
+        if (!el) return;
+        const val = String(getter(ctx) ?? '');
+        // Soporta <input>, <textarea> o <select>
+        if ('value' in el) el.value = val;
+        // también dejamos el atributo por si el HTML solo lee atributos
+        el.setAttribute('value', val);
+      }
+    });
+
+    // 2) Firma del profesional (Entidad3) -> ABSOLUTA
+    const profDoc = ctx.profesional?.documento || '';
+    const firmaProEl = doc.getElementById('Entidad3');
+    if (firmaProEl && profDoc) {
+      // convierte ../FirmasProfesionales/... en absoluta
+      const abs = new URL(`/FirmasProfesionales/${encodeURIComponent(profDoc)}.png`, location.origin).href;
+      firmaProEl.setAttribute('src', abs);
+      // por si el template la tenía relativa:
+      firmaProEl.src = abs;
+    }
+
+    // 3) (opcional) Foto paciente (Entidad1) si la manejas
+    // const fotoEl = doc.getElementById('Entidad1');
+    // if (fotoEl && ctx.paciente?.numero) {
+    //   const absFoto = new URL(`/FotosPacientes/${encodeURIComponent(ctx.paciente.numero)}.png`, location.origin).href;
+    //   fotoEl.src = absFoto;
+    // }
+  }
+
 
   // Botones del visor
   $('#printBtn')?.addEventListener('click', () => {
@@ -237,6 +352,75 @@ document.addEventListener('DOMContentLoaded', () => {
   // });
 
 
+  async function fetchempresas() {
+    const selectEl = document.getElementById('EmpresasSelect');
+
+
+    let resp = await tryFetch(`api/empresas`, {
+      headers: apiHeaders(),
+      cache: 'no-store',
+    });
+    if (!resp)
+      resp = await tryFetch(`./api/empresas`, {
+        headers: apiHeaders(),
+        cache: 'no-store',
+      });
+    if (!resp) {
+      alert('No se pudo conectar con el servicio de pacientes.');
+      return;
+    }
+
+
+
+    const data = await resp.json();
+    console.log('empresas fetched:', data);
+
+    selectEl.innerHTML = '';
+
+    // Placeholder
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Seleccione una empresa...';
+    ph.disabled = true;
+    ph.selected = true;
+    selectEl.appendChild(ph);
+
+    // Normalizador de campos por si cambian mayúsculas/estilo
+    const get = (obj, keys) => {
+      for (const k of keys) {
+        if (obj[k] != null) return obj[k];
+      }
+      return undefined;
+    };
+
+    // Asegura que sea un array
+    const rows = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+
+    // Mapea y filtra registros válidos
+    const items = rows.map(r => {
+      const doc = get(r, [
+        'documentoEmpresa'
+      ]);
+      const nombre = get(r, [
+        'razonSocialEmpresa'
+      ]);
+      return { doc, nombre };
+    }).filter(x => x.doc && x.nombre);
+
+    // Ordena por nombre (opcional)
+    items.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+
+    // Inserta opciones
+    const frag = document.createDocumentFragment();
+    for (const { doc, nombre } of items) {
+      const opt = document.createElement('option');
+      opt.value = String(doc);
+      opt.textContent = String(nombre);
+      frag.appendChild(opt);
+    }
+    selectEl.appendChild(frag);
+  }
+
 
   async function fetchProfesionales() {
     const selectEl = document.getElementById('profSelect');
@@ -322,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Llamar al fetch en el onload
   window.addEventListener('DOMContentLoaded', fetchProfesionales);
+  window.addEventListener('DOMContentLoaded', fetchempresas);
 
   // --- Lista y selector de consentimientos (mantengo tu doble fetch + render)
   async function loadConsentimientos() {
@@ -422,6 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sel = $('#consSelect');
     const fileEnc = sel?.value || '';
     const selectEl = document.getElementById('profSelect');
+    const selectEm = document.getElementById('EmpresasSelect');
     if (!fileEnc) {
       alert('Selecciona un consentimiento de la lista.');
       return;
@@ -429,6 +615,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!selectEl.value.trim()) {
       alert('Selecciona un profesional de la lista.');
+      return;
+    }
+
+    if (!selectEm.value.trim()) {
+      alert('Selecciona una Empresa de la lista.');
       return;
     }
 
@@ -446,6 +637,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return null;
     }
 
+    const selectEm = document.getElementById('EmpresasSelect');
+    const EmpDocumento = selectEm.value;
+    const EmpNombre = selectEm.options[selectEm.selectedIndex]?.text;
+
     const selectEl = document.getElementById('profSelect');
     const profDocumento = selectEl.value;
     const profNombre = selectEl.options[selectEl.selectedIndex]?.text;
@@ -457,6 +652,8 @@ document.addEventListener('DOMContentLoaded', () => {
       correo: paciente.correo || '',
       profDocumento: profDocumento || '',
       profNombre: profNombre || '',
+      EmpDocumento: EmpDocumento || '',
+      EmpNombre: EmpNombre || '',
     }); // esto ya lo hacías en tu versión previa al abrir en una pestaña nueva :contentReference[oaicite:3]{index=3}
     return `${baseHref}?${qs.toString()}`;
   }
@@ -485,6 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Carga inicial
   loadConsentimientos();
   fetchProfesionales();
+  fetchempresas();
 });
 
 
@@ -820,12 +1018,49 @@ saveBtn?.addEventListener('click', async () => {
     }
 
     // 3) IMG blob:/relativas → data:/absolutas
+    // {
+    //   const imgs = Array.from(cloneEl.querySelectorAll('img'));
+    //   for (const img of imgs) {
+    //     let src = img.getAttribute('src') || '';
+    //     try {
+    //       if (!src) continue;
+    //       if (src.startsWith('blob:')) {
+    //         const blob = await w.fetch(src).then(r => r.blob());
+    //         const dataUrl = await new Promise((resolve) => {
+    //           const fr = new w.FileReader();
+    //           fr.onloadend = () => resolve(fr.result);
+    //           fr.readAsDataURL(blob);
+    //         });
+    //         img.setAttribute('src', dataUrl);
+    //       } else if (src.startsWith('/')) {
+    //         img.setAttribute('src', `${location.origin}${src}`);
+    //       }
+    //     } catch { /* si falla, mantener src */ }
+    //   }
+    // }
+    // 3) IMG blob:/relativas → data:/absolutas (incluye ../ y ./)
     {
+      const baseHref = frame.contentWindow.location.href; // URL de la página dentro del iframe
       const imgs = Array.from(cloneEl.querySelectorAll('img'));
+
+      // helper para convertir a dataURL (útil para #Entidad3)
+      async function toDataURL(absUrl) {
+        const res = await w.fetch(absUrl, { cache: 'no-store' });
+        const blob = await res.blob();
+        const dataUrl = await new Promise((resolve) => {
+          const fr = new w.FileReader();
+          fr.onloadend = () => resolve(fr.result);
+          fr.readAsDataURL(blob);
+        });
+        return dataUrl; // 'data:image/png;base64,...'
+      }
+
       for (const img of imgs) {
         let src = img.getAttribute('src') || '';
         try {
           if (!src) continue;
+
+          // a) blob: → data:
           if (src.startsWith('blob:')) {
             const blob = await w.fetch(src).then(r => r.blob());
             const dataUrl = await new Promise((resolve) => {
@@ -834,16 +1069,95 @@ saveBtn?.addEventListener('click', async () => {
               fr.readAsDataURL(blob);
             });
             img.setAttribute('src', dataUrl);
-          } else if (src.startsWith('/')) {
-            img.setAttribute('src', `${location.origin}${src}`);
+            continue;
           }
-        } catch { /* si falla, mantener src */ }
+
+          // b) data: → ya está embebido
+          if (src.startsWith('data:')) continue;
+
+          // c) ABSOLUTA http/https → la dejamos (Puppeteer la carga)
+          if (/^https?:\/\//i.test(src)) {
+            // Pero si es la firma del profesional (#Entidad3), la embebemos para mayor robustez
+            if (img.id === 'Entidad3') {
+              const dataUrl = await toDataURL(src);
+              img.setAttribute('src', dataUrl);
+            }
+            continue;
+          }
+
+          // d) RELATIVAS (incluye "../FirmasProfesionales/..." y "FirmasProfesionales/...")
+          //    Resolver contra la URL del iframe
+          const abs = new URL(src, baseHref).href; // ej: http://localhost:3000/FirmasProfesionales/123.png
+
+          // Para #Entidad3 (firma profesional) embebemos en dataURL para que nunca falle
+          if (img.id === 'Entidad3') {
+            const dataUrl = await toDataURL(abs);
+            img.setAttribute('src', dataUrl);
+          } else {
+            img.setAttribute('src', abs); // suficiente para el resto de imágenes
+          }
+        } catch {
+          // si algo falla, dejamos el src como está
+        }
       }
     }
+
+    // === Sincroniza todos los inputs, textareas y selects del iframe al clon ===
+    (function syncFormState(srcDoc, cloneDoc) {
+      // INPUTS
+      srcDoc.querySelectorAll('input').forEach((srcInput) => {
+        // localizar el input correspondiente en el clon
+        const cloneInput = cloneDoc.querySelector(`input[name="${srcInput.name}"]`)
+          || cloneDoc.querySelector(`#${srcInput.id}`);
+        if (!cloneInput) return;
+
+        const type = (srcInput.type || '').toLowerCase();
+
+        switch (type) {
+          case 'checkbox':
+          case 'radio':
+            if (srcInput.checked) cloneInput.setAttribute('checked', 'checked');
+            else cloneInput.removeAttribute('checked');
+            break;
+          case 'file':
+            // no se puede copiar contenido de archivos, se deja vacío
+            cloneInput.removeAttribute('value');
+            break;
+          default:
+            cloneInput.setAttribute('value', srcInput.value ?? '');
+        }
+      });
+
+      // TEXTAREAS
+      srcDoc.querySelectorAll('textarea').forEach((src) => {
+        const clone = cloneDoc.querySelector(`textarea[name="${src.name}"]`)
+          || cloneDoc.querySelector(`#${src.id}`);
+        if (!clone) return;
+        clone.textContent = src.value ?? '';
+      });
+
+      // SELECTS
+      srcDoc.querySelectorAll('select').forEach((src) => {
+        const clone = cloneDoc.querySelector(`select[name="${src.name}"]`)
+          || cloneDoc.querySelector(`#${src.id}`);
+        if (!clone) return;
+
+        // marcar las opciones seleccionadas
+        Array.from(clone.options).forEach((opt) => opt.removeAttribute('selected'));
+        Array.from(src.options).forEach((opt, i) => {
+          if (opt.selected) clone.options[i]?.setAttribute('selected', 'selected');
+        });
+
+        clone.setAttribute('value', src.value ?? '');
+      });
+    })(srcDoc, cloneEl);
 
     // 4) HTML final con DOCTYPE
     const html = '<!DOCTYPE html>\n' + cloneEl.outerHTML;
 
+    const selectEm = document.getElementById('EmpresasSelect');
+    const EmpDocumento = selectEm.value;
+    // const EmpNombre = selectEm.options[selectEm.selectedIndex]?.text;
     // 5) Datos del paciente
     const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
     const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
@@ -855,7 +1169,8 @@ saveBtn?.addEventListener('click', async () => {
         html,
         pacienteNombre: nombre,
         pacienteDoc: doc,
-        descripcion: 'Consentimiento firmado'
+        descripcion: 'Consentimiento firmado',
+        documentoEmpresa: EmpDocumento
       })
     });
 

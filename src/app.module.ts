@@ -14,6 +14,8 @@ import { ProfesionalesModule } from './profesionales/profesionales.module';
 import { FirmasModule } from './firmas/firmas.module';
 import { ConsentimientosModule } from './consentimientos/consentimientos.module';
 import { DocumentoAnexoArchivoModule } from './documento-anexo-archivo/documento-anexo-archivo.module';
+import { EmpresasModule } from './empresas/empresas.module';
+import { EvaluacionentidadModule } from './evaluacionentidad/evaluacionentidad.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { DocumentoAnexoArchivoModule } from './documento-anexo-archivo/documento
     FirmasModule,
     ConsentimientosModule,
     DocumentoAnexoArchivoModule,
+    EmpresasModule,
+    EvaluacionentidadModule,
   ],
 
   controllers: [AppController, ConsentimientosController],

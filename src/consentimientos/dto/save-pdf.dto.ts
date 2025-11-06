@@ -15,4 +15,8 @@ export class SavePdfDto {
   @IsOptional()
   @IsString()
   descripcion?: string;
+
+  @IsOptional()
+  @IsString()
+  documentoEmpresa?: string;
 }

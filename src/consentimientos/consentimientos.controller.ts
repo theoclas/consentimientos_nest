@@ -129,6 +129,7 @@ export class ConsentimientosController {
         descripcionDocumentoAnexo: filename,
         // descripcionDocumentoAnexo: body.descripcion ?? 'Consentimiento firmado',
         rutaCarpeta: baseDir,
+        documentoEmpresa: body.documentoEmpresa,
       });
       
       await this.documentoAnexoService.saveArchivoBase64(
