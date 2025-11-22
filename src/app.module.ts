@@ -36,7 +36,7 @@ import { CnstaNestPacientesFormulaModule } from './cnsta-nest-pacientes-formula/
       database: 'Laureles',
       autoLoadEntities: true,
       synchronize: false,
-      logging: true,
+      logging: false,
       options: {
         encrypt: false,
       },

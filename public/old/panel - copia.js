@@ -129,47 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  const CONS_FIELDS = {
-    T1: (ctx) => ctx.paciente?.nombre ?? '',
-    T2: (ctx) => ctx.paciente?.noHistoria ?? '',         // si tienes ese dato
-    T3: (ctx) => ctx.paciente?.edad ?? '',
-    T4: (ctx) => ctx.paciente?.fechaHistoria ?? '',
-    T5: (ctx) => ctx.paciente?.numero ?? '',
-    T6: (ctx) => ctx.paciente?.direccion ?? '',
-    T7: (ctx) => ctx.paciente?.ciudad ?? '',
-    T8: (ctx) => ctx.paciente?.telDomicilio ?? '',
-    T9: (ctx) => ctx.paciente?.fechaNacimiento ?? '',
-    T10: (ctx) => ctx.paciente?.sexo ?? '',
-    T11: (ctx) => ctx.paciente?.estadoCivil ?? '',
-    T12: (ctx) => ctx.paciente?.ocupacion ?? '',
-    T13: (ctx) => ctx.paciente?.aseguradora ?? '',
-    T14: (ctx) => ctx.paciente?.tipoVinculacion ?? '',
-    T15: (ctx) => ctx.paciente?.acompanante ?? '',
-    T16: (ctx) => ctx.paciente?.parentescoAcompanante ?? '',
-    T17: (ctx) => ctx.paciente?.telAcompanante ?? '',
-    T18: (ctx) => ctx.paciente?.responsable ?? '',
-    T19: (ctx) => ctx.paciente?.parentescoResponsable ?? '',
-    T20: (ctx) => ctx.paciente?.telResponsable ?? '',
-    T21: (ctx) => ctx.usuarioActual ?? '',
-    T22: (ctx) => ctx.paciente?.horaHistoria ?? '',
-    T23: (ctx) => ctx.paciente?.lugarNacimiento ?? '',
-    T24: (ctx) => ctx.paciente?.barrio ?? '',
-    T25: (ctx) => ctx.paciente?.telefono2 ?? '',
-    T26: (ctx) => ctx.paciente?.celular ?? '',
-    T27: (ctx) => ctx.paciente?.tipoDocumento ?? '',
-    T28: (ctx) => ctx.paciente?.tipoUsuario ?? '',
-    T29: (ctx) => ctx.profesional?.registroMedico ?? '',   // Registro Médico
-    T30: (ctx) => ctx.paciente?.fechaHistoriaNumerica ?? '',
-    T31: (ctx) => ctx.rips?.codigo1 ?? '',
-    T32: (ctx) => ctx.rips?.descripcion1 ?? '',
-    T33: (ctx) => ctx.rips?.codigo2 ?? '',
-    T34: (ctx) => ctx.paciente?.edadGestacional ?? '',
-    T36: (ctx) => ctx.paciente?.correo ?? '',
-
-    // Entidad1: foto del paciente (img)
-    // Entidad2: firma del paciente (img) -> la setea tu flujo de firma
-    // Entidad3: firma del profesional (img)
-  };
+ 
 
   // Devuelve el "contexto" (datos) desde tu UI para rellenar el iframe
   function buildConsentContext() {
@@ -197,43 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return ctx;
   }
 
-  // Rellena inputs/textarea/select por ID (T1..T36) y pone la firma del profesional en Entidad3
-  function fillConsentFieldsInIframe(frame) {
-    if (!frame?.contentDocument) return;
-    const doc = frame.contentDocument;
-    const ctx = buildConsentContext();
 
-    // 1) Campos T*
-    Object.entries(CONS_FIELDS).forEach(([id, getter]) => {
-      if (id.startsWith('T')) {
-        const el = doc.getElementById(id);
-        if (!el) return;
-        const val = String(getter(ctx) ?? '');
-        // Soporta <input>, <textarea> o <select>
-        if ('value' in el) el.value = val;
-        // también dejamos el atributo por si el HTML solo lee atributos
-        el.setAttribute('value', val);
-      }
-    });
-
-    // 2) Firma del profesional (Entidad3) -> ABSOLUTA
-    const profDoc = ctx.profesional?.documento || '';
-    const firmaProEl = doc.getElementById('Entidad3');
-    if (firmaProEl && profDoc) {
-      // convierte ../FirmasProfesionales/... en absoluta
-      const abs = new URL(`/FirmasProfesionales/${encodeURIComponent(profDoc)}.png`, location.origin).href;
-      firmaProEl.setAttribute('src', abs);
-      // por si el template la tenía relativa:
-      firmaProEl.src = abs;
-    }
-
-    // 3) (opcional) Foto paciente (Entidad1) si la manejas
-    // const fotoEl = doc.getElementById('Entidad1');
-    // if (fotoEl && ctx.paciente?.numero) {
-    //   const absFoto = new URL(`/FotosPacientes/${encodeURIComponent(ctx.paciente.numero)}.png`, location.origin).href;
-    //   fotoEl.src = absFoto;
-    // }
-  }
 
 
   // Botones del visor
@@ -252,104 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // alert('Firmar: pendiente de implementar. Aquí invocaremos el flujo de firma.');
   });
 
-
-  // $('#saveBtn')?.addEventListener('click', async () => {
-  //   const frame = document.querySelector('#viewer');
-  //   if (!frame?.contentDocument || !frame.contentWindow) {
-  //     alert('No hay documento cargado.');
-  //     return;
-  //   }
-
-  //   const w = frame.contentWindow;
-  //   const srcDoc = frame.contentDocument;
-
-  //   // 1) Clonamos el documento para no tocar lo que ve el usuario
-  //   const cloneEl = srcDoc.documentElement.cloneNode(true);
-
-  //   // 2) CANVAS → IMG (firma dibujada)
-  //   {
-  //     const origCanvases = Array.from(srcDoc.querySelectorAll('canvas'));
-  //     const cloneCanvases = Array.from(cloneEl.querySelectorAll('canvas'));
-  //     origCanvases.forEach((orig, i) => {
-  //       try {
-  //         const dataUrl = orig.toDataURL('image/png'); // píxeles de la firma
-  //         const cloneNode = cloneCanvases[i];
-  //         if (!cloneNode) return;
-
-  //         const img = cloneEl.ownerDocument.createElement('img');
-  //         img.src = dataUrl;
-  //         img.alt = cloneNode.getAttribute?.('alt') || 'Firma';
-  //         // copiar tamaño/estilos/clases
-  //         if (cloneNode.getAttribute) img.setAttribute('style', cloneNode.getAttribute('style') || '');
-  //         if (cloneNode.className) img.className = cloneNode.className;
-  //         if (orig.width) img.width = orig.width;
-  //         if (orig.height) img.height = orig.height;
-
-  //         cloneNode.replaceWith(img);
-  //       } catch { /* canvas tainted o sin firma: ignorar */ }
-  //     });
-  //   }
-
-  //   // 3) IMG blob:/relativas → data:/absolutas
-  //   {
-  //     const imgs = Array.from(cloneEl.querySelectorAll('img'));
-  //     for (const img of imgs) {
-  //       let src = img.getAttribute('src') || '';
-  //       try {
-  //         if (!src) continue;
-
-  //         // a) blob: → data:
-  //         if (src.startsWith('blob:')) {
-  //           const blob = await w.fetch(src).then(r => r.blob());
-  //           const dataUrl = await new Promise((resolve) => {
-  //             const fr = new w.FileReader();
-  //             fr.onloadend = () => resolve(fr.result);
-  //             fr.readAsDataURL(blob);
-  //           });
-  //           img.setAttribute('src', dataUrl);
-  //         }
-  //         // b) relativas → absolutas (para que Puppeteer las cargue)
-  //         else if (src.startsWith('/')) {
-  //           img.setAttribute('src', `${location.origin}${src}`);
-  //         }
-  //       } catch {
-  //         // si algo falla, dejamos el src como está
-  //       }
-  //     }
-  //   }
-
-  //   // 4) HTML final con DOCTYPE
-  //   const html = '<!DOCTYPE html>\n' + cloneEl.outerHTML;
-
-  //   // 5) Datos del paciente
-  //   const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
-  //   const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
-
-  //   try {
-  //     const resp = await fetch('/api/consentimientos/pdf', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({
-  //         html,
-  //         pacienteNombre: nombre,
-  //         pacienteDoc: doc,
-  //         descripcion: 'Consentimiento firmado'
-  //       })
-  //     });
-
-  //     if (!resp.ok) throw new Error(await resp.text());
-  //     const json = await resp.json();
-
-  //     const msg = `✅ PDF guardado.\n\nRuta: ${json.filePath}\nID: ${json.anexoId}`;
-  //     // if (confirm(msg + '\n\n¿Abrir PDF ahora?')) {
-  //     //   window.open(`/api/consentimientos/pdf/${json.anexoId}`, '_blank');
-  //     // }
-  //     confirm(msg)
-  //     // alert('El PDF se ha guardado correctamente en el servidor.\n\n ', msg);
-  //   } catch (e) {
-  //     alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
-  //   }
-  // });
 
 
   async function fetchempresas() {
@@ -545,45 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmls = Array.isArray(archivos)
       ? archivos.filter((n) => /\.html?$/i.test(n))
       : [];
-
-    // // 2) Render lista a la derecha (tal como hacías, pero con botón "Ver aquí")
-    // if (listEl) {
-    //   if (htmls.length === 0) {
-    //     listEl.innerHTML =
-    //       '<div class="item">No hay archivos HTML en <b>/public/Consentimientos</b>.</div>';
-    //   } else {
-    //     listEl.innerHTML = '';
-    //     htmls.forEach((file) => {
-    //       const display = file;
-    //       const item = document.createElement('div');
-    //       item.className = 'item';
-    //       item.innerHTML = `
-    //         <div class="pill">HTML</div>
-    //         <div style="font-weight:700;color:#0f172a">${display}</div>
-    //         <div style="margin-left:auto">
-    //           <button class="btn small" type="button">Ver aquí</button>
-    //           <a class="btn small" target="_blank" rel="noopener">Nueva pestaña</a>
-    //         </div>
-    //       `;
-    //       const verAquiBtn = item.querySelector('button');
-    //       const abrirNueva = item.querySelector('a');
-
-    //       // URL base /Consentimientos/<archivo> (igual que tu implementación)
-    //       const base =
-    //         '/Consentimientos/' +
-    //         encodeURIComponent(file).replace(/%2F/g, '/');
-
-    //       verAquiBtn.addEventListener('click', () => {
-    //         const url = buildConsentUrl(base);
-    //         if (!url) return;
-    //         openInViewer(url, display);
-    //       });
-    //       abrirNueva.href = base;
-
-    //       listEl.appendChild(item);
-    //     });
-    //   }
-    // }
+ 
 
     // 3) Poblar <select> de forma ordenada
     if (selectEl) {
@@ -644,6 +432,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectEl = document.getElementById('profSelect');
     const profDocumento = selectEl.value;
     const profNombre = selectEl.options[selectEl.selectedIndex]?.text;
+    console.log(profDocumento, profNombre);
+    console.log("profDocumento", "profNombre");
+    
     const qs = new URLSearchParams({
       nombre: paciente.nombre || '',
       // nombre: paciente.nombre || '',
@@ -654,6 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
       profNombre: profNombre || '',
       EmpDocumento: EmpDocumento || '',
       EmpNombre: EmpNombre || '',
+      profNombre2: "EmpNombre2" || '',
     }); // esto ya lo hacías en tu versión previa al abrir en una pestaña nueva :contentReference[oaicite:3]{index=3}
     return `${baseHref}?${qs.toString()}`;
   }
@@ -667,6 +459,11 @@ document.addEventListener('DOMContentLoaded', () => {
       numero: get('[data-field="numero"]'),
       celular: get('[data-field="celular"]'),
       correo: get('[data-field="correo"]'),
+      profDocumento: get('[data-field="profDocumento"]'),
+      profNombre: get('[data-field="profNombre"]'),
+      EmpDocumento: get('[data-field="EmpDocumento"]'),
+      EmpNombre: get('[data-field="EmpNombre"]'),
+      profNombre2: get('[data-field="profNombre2"]'),
     };
   }
 
@@ -928,36 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const doc = frame.contentDocument;
     return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
   }
-
-  // const saveBtn = $('#saveBtn');
-  // if (saveBtn && !saveBtn.dataset.saveBound) {
-  //   saveBtn.dataset.saveBound = '1';
-  //   saveBtn.addEventListener('click', async () => {
-  //     try {
-  //       const html = await getIframeHtml();
-  //       const { nombre, doc } = getPacienteFromIframe();
-
-  //       const resp = await fetch('/api/consentimientos/pdf', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({
-  //           html,                      // HTML completo
-  //           pacienteNombre: nombre,
-  //           pacienteDoc: doc,
-  //           descripcion: 'Consentimiento firmado'
-  //         })
-  //       });
-  //       if (!resp.ok) throw new Error(await resp.text() || 'Error generando PDF');
-  //       const json = await resp.json();
-  //       // { filePath: 'C:\\CeereSio\\Documentos\\consentimiento_123_2025-11-03_10-22.pdf', anexoId: 1234 }
-
-  //       alert('PDF guardado en:\n' + json.filePath + (json.anexoId ? `\n(DocumentoAnexo #${json.anexoId} creado)` : ''));
-  //     } catch (e) {
-  //       console.error(e);
-  //       alert('No se pudo guardar el PDF: ' + (e?.message || String(e)));
-  //     }
-  //   });
-  // }
+ 
 })();
 
 
@@ -1017,27 +785,6 @@ saveBtn?.addEventListener('click', async () => {
       });
     }
 
-    // 3) IMG blob:/relativas → data:/absolutas
-    // {
-    //   const imgs = Array.from(cloneEl.querySelectorAll('img'));
-    //   for (const img of imgs) {
-    //     let src = img.getAttribute('src') || '';
-    //     try {
-    //       if (!src) continue;
-    //       if (src.startsWith('blob:')) {
-    //         const blob = await w.fetch(src).then(r => r.blob());
-    //         const dataUrl = await new Promise((resolve) => {
-    //           const fr = new w.FileReader();
-    //           fr.onloadend = () => resolve(fr.result);
-    //           fr.readAsDataURL(blob);
-    //         });
-    //         img.setAttribute('src', dataUrl);
-    //       } else if (src.startsWith('/')) {
-    //         img.setAttribute('src', `${location.origin}${src}`);
-    //       }
-    //     } catch { /* si falla, mantener src */ }
-    //   }
-    // }
     // 3) IMG blob:/relativas → data:/absolutas (incluye ../ y ./)
     {
       const baseHref = frame.contentWindow.location.href; // URL de la página dentro del iframe
@@ -1159,8 +906,10 @@ saveBtn?.addEventListener('click', async () => {
     const EmpDocumento = selectEm.value;
     // const EmpNombre = selectEm.options[selectEm.selectedIndex]?.text;
     // 5) Datos del paciente
-    const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
-    const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
+    // const nombre = srcDoc.getElementById('T1')?.value || 'paciente';
+    const nombre = srcDoc.getElementById('nombre')?.value || 'paciente';
+    // const doc = srcDoc.getElementById('T5')?.value || 'sin_doc';
+    const doc = srcDoc.getElementById('CedulaPaciente')?.value || 'sin_doc';
 
     const resp = await fetch('/api/consentimientos/pdf', {
       method: 'POST',
@@ -1186,5 +935,83 @@ saveBtn?.addEventListener('click', async () => {
     setSaving(false);
   }
 });
+
+
+// ==== CAMBIO ENTRE SECCIONES ====
+const formulaSection = document.getElementById('formulaMedica');
+const consentSection = document.getElementById('Consentimientos');
+// const consentSection = document.querySelector('.Consentimientos');
+const btnFormula = document.getElementById('FormulaMedicaBtn');
+const btnConsent = document.getElementById('ConsentimientosBtn');
+
+// Mostrar Formulario de Paciente (Fórmula Médica)
+btnFormula?.addEventListener('click', () => {
+  formulaSection.hidden = false;
+  consentSection.style.display = 'none'; // oculta consentimientos
+  btnFormula.disabled = true;
+  btnConsent.disabled = false;
+});
+
+// Mostrar Consentimientos
+btnConsent?.addEventListener('click', () => {
+  consentSection.style.display = 'block';
+  formulaSection.hidden = true; // oculta formulario
+  btnConsent.disabled = true;
+  btnFormula.disabled = false;
+});
+
+
+
+// --- Consulta de paciente en vista Formula
+async function consultarPacienteFormula() {
+  const doc = document.getElementById('docFormula').value.trim();
+  if (!doc) {
+    alert('Ingrese un documento para consultar.');
+    return;
+  }
+  console.log(doc);
+
+  // const resp = await tryFetch(`api/cnsta-nest-pacientes-formula/${encodeURIComponent(doc)}`, { cache: 'no-store' });
+  // if (!resp) {
+  //   alert('No se pudo conectar con el servidor.');
+  //   return;
+  // }
+
+  const resp = await fetch(`api/cnsta-nest-pacientes-formula/${encodeURIComponent(doc)}`, { cache: 'no-store' });
+  if (!resp.ok) {
+    alert('No se pudo conectar con el servidor.');
+    return;
+  }
+
+
+  const data = await resp.json();
+  if (!data) {
+    alert('No se encontró información para el documento especificado.');
+    return;
+  }
+console.log(data);
+
+  // Rellenar campos (solo lectura)
+  document.getElementById('edadFormula').value = data['edadEntidadIII'] ?? '';
+  document.getElementById('direccionFormula').value = data['direccionEntidadII'] ?? '';
+  document.getElementById('ciudadFormula').value = data['ciudad'] ?? '';
+  document.getElementById('telefono1Formula').value = data['telefono1EntidadII'] ?? '';
+  document.getElementById('telefono2Formula').value = data['telefono2EntidadII'] ?? '';
+  document.getElementById('celularFormula').value = data['telefonoCelularEntidadII'] ?? '';
+  document.getElementById('fechaNacFormula').value = data['fechaNacimientoEntidadIII']?.split('T')[0] ?? '';
+  document.getElementById('sexoFormula').value = data['sexo'] ?? '';
+  document.getElementById('estadoCivilFormula').value = data['estadoCivil'] ?? '';
+  document.getElementById('NombrePaciente').value = data['NombreCompleto'] ?? '';
+}
+
+// Dispara la búsqueda al presionar Enter
+document.getElementById('docFormula')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    consultarPacienteFormula();
+  }
+});
+
+document.getElementById('Buscarbtn2')?.addEventListener('click', consultarPacienteFormula);
 
 

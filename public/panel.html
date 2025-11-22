@@ -25,6 +25,15 @@
       box-sizing: border-box;
     }
 
+    /* Campos de solo lectura */
+    .input[readonly],
+    .input.readonly {
+      background-color: #f1f5f9;
+      color: #475569;
+      cursor: not-allowed;
+      border-color: #e2e8f0;
+    }
+
     html,
     body {
       height: 100%;
@@ -86,6 +95,11 @@
       gap: 20px;
       padding: 18px;
     }
+
+    /* .Consentimientos section {
+      margin-bottom: 12px;
+      display: none;
+    } */
 
     /* parte superior: dos columnas */
     .top-panels {
@@ -275,83 +289,156 @@
       <div>
         <section>
           <button class="btn small" id="FormulaMedicaBtn">Formula Medica</button>
-
+          <button class="btn small" id="ConsentimientosBtn">Consentimientos</button>
         </section>
       </div>
-      <!-- parte superior -->
-      <div class="top-panels">
-        <section class="panel">
+
+
+      <!-- Nueva sección: Formulario de paciente (Fórmula Médica) -->
+      <section class="FormulaMedica" id="formulaMedica" hidden>
+        <div class="panel">
           <div class="head">
-            <h2>Paciente</h2>
+            <h2>Formulario de Paciente (Fórmula Médica)</h2>
           </div>
           <div class="body">
-            <div class="row">
-              <input class="input" id="docInput" placeholder="Documento del paciente">
-              <button class="btn" id="buscarBtn">Buscar</button>
-            </div>
-            <p class="hint">Ingresa cualquier documento: mostrará información de ejemplo.</p>
-            <div class="info-grid" id="infoPaciente" hidden>
-              <div class="card">
-                <div class="label">Nombre</div>
-                <div class="value" data-field="nombre"></div>
-              </div>
-              <!-- <div class="card"><div class="label">TipoDocumento</div><div class="value" data-field="TipoDocumento"></div></div> -->
+            <form id="formulaForm" class="info-grid">
+              <!-- Documento (único editable) -->
               <div class="card">
                 <div class="label">Documento</div>
-                <div class="value" data-field="numero"></div>
+                <input class="input" id="docFormula" placeholder="Ingrese documento para consultar..." />
+                <button type="button" id="Buscarbtn2" class="btn">Buscar</button>
+              </div>
+
+              <!-- Campos de solo lectura -->
+              <div class="card">
+                <div class="label">Nombre</div>
+                <input class="input readonly" id="NombrePaciente" readonly />
+              </div>
+              <div class="card">
+                <div class="label">Edad</div>
+                <input class="input readonly" id="edadFormula" readonly />
+              </div>
+              <div class="card">
+                <div class="label">Dirección</div>
+                <input class="input readonly" id="direccionFormula" readonly />
+              </div>
+              <div class="card">
+                <div class="label">Ciudad</div>
+                <input class="input readonly" id="ciudadFormula" readonly />
+              </div>
+              <div class="card">
+                <div class="label">Teléfono #1</div>
+                <input class="input readonly" id="telefono1Formula" readonly />
+              </div>
+              <div class="card">
+                <div class="label">Teléfono #2</div>
+                <input class="input readonly" id="telefono2Formula" readonly />
               </div>
               <div class="card">
                 <div class="label">Celular</div>
-                <div class="value" data-field="celular"></div>
+                <input class="input readonly" id="celularFormula" readonly />
               </div>
               <div class="card">
-                <div class="label">Correo</div>
-                <div class="value" data-field="correo"></div>
+                <div class="label">Fecha Nacimiento</div>
+                <input type="date" class="input readonly" id="fechaNacFormula" readonly />
               </div>
-              <!-- <div class="card"><div class="label">Responsable</div><div class="value" data-field="Responsable"></div></div>
-              <div class="card"><div class="label">ParentescoResponsable</div><div class="value" data-field="ParentescoResponsable"></div></div> -->
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="head">
-            <h2>Consentimientos disponibles</h2>
-          </div>
-          <div class="body">
-            <div class="list" id="consList"></div>
-            <p class="hint">Los archivos se leen desde la carpeta <b>/Consentimientos/</b>.</p>
-            <div class="row" style="margin-top:12px;">
-              <select id="EmpresasSelect"></select>
-            </div>
-            <div class="row" style="margin-top:12px;">
-              <select id="profSelect"></select>
-            </div>
-            <div class="row" style="margin-top:12px;">
-              <select id="consSelect"></select>
-              <button class="btn" id="verAquiBtn">Cargar en visor</button>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- visor inferior -->
-      <section class="viewer-panel" id="viewerWrap" hidden>
-        <div class="viewer-toolbar">
-          <div class="viewer-title" id="viewerTitle">Vista previa</div>
-          <div class="viewer-controls">
-            <a class="btn small" id="openNew" target="_blank">Abrir en pestaña</a>
-            <button class="btn small" id="signBtn">Firmar</button>
-            <button class="btn small" id="saveBtn">Guardar</button>
-            <button class="btn small" id="printBtn">Imprimir</button>
+              <div class="card">
+                <div class="label">Sexo</div>
+                <input class="input readonly" id="sexoFormula" readonly />
+              </div>
+              <div class="card">
+                <div class="label">Estado Civil</div>
+                <input class="input readonly" id="estadoCivilFormula" readonly />
+              </div>
+              <!-- <div class="card">
+                <div class="label">Descripción Sexo</div>
+                <input class="input readonly" id="descSexoFormula" readonly />
+              </div> -->
+            </form>
           </div>
         </div>
-        <iframe id="viewer"></iframe>
       </section>
+
+
+
+
+      <section class="Consentimientos" id="Consentimientos">
+        <!-- parte superior -->
+        <div class="top-panels">
+          <section class="panel">
+            <div class="head">
+              <h2>Paciente</h2>
+            </div>
+            <div class="body">
+              <div class="row">
+                <input class="input" id="docInput" placeholder="Documento del paciente">
+                <button class="btn" id="buscarBtn">Buscar</button>
+              </div>
+              <p class="hint">Ingresa cualquier documento: mostrará información de ejemplo.</p>
+              <div class="info-grid" id="infoPaciente" hidden>
+                <div class="card">
+                  <div class="label">Nombre</div>
+                  <div class="value" data-field="nombre"></div>
+                </div>
+                <!-- <div class="card"><div class="label">TipoDocumento</div><div class="value" data-field="TipoDocumento"></div></div> -->
+                <div class="card">
+                  <div class="label">Documento</div>
+                  <div class="value" data-field="numero"></div>
+                </div>
+                <div class="card">
+                  <div class="label">Celular</div>
+                  <div class="value" data-field="celular"></div>
+                </div>
+                <div class="card">
+                  <div class="label">Correo</div>
+                  <div class="value" data-field="correo"></div>
+                </div>
+                <!-- <div class="card"><div class="label">Responsable</div><div class="value" data-field="Responsable"></div></div>
+              <div class="card"><div class="label">ParentescoResponsable</div><div class="value" data-field="ParentescoResponsable"></div></div> -->
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="head">
+              <h2>Consentimientos disponibles</h2>
+            </div>
+            <div class="body">
+              <div class="list" id="consList"></div>
+              <p class="hint">Los archivos se leen desde la carpeta <b>/Consentimientos/</b>.</p>
+              <div class="row" style="margin-top:12px;">
+                <select id="EmpresasSelect"></select>
+              </div>
+              <div class="row" style="margin-top:12px;">
+                <select id="profSelect"></select>
+              </div>
+              <div class="row" style="margin-top:12px;">
+                <select id="consSelect"></select>
+                <button class="btn" id="verAquiBtn">Cargar en visor</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- visor inferior -->
+        <section class="viewer-panel" id="viewerWrap" hidden>
+          <div class="viewer-toolbar">
+            <div class="viewer-title" id="viewerTitle">Vista previa</div>
+            <div class="viewer-controls">
+              <a class="btn small" id="openNew" target="_blank">Abrir en pestaña</a>
+              <button class="btn small" id="signBtn">Firmar</button>
+              <button class="btn small" id="saveBtn">Guardar</button>
+              <button class="btn small" id="printBtn">Imprimir</button>
+            </div>
+          </div>
+          <iframe id="viewer"></iframe>
+        </section>
+      </section>
+
     </main>
   </div>
 
-  <script src="js/panel.js"></script>
+<script type="module" src="/js/main.js"></script>
 </body>
 <style>
   .btn[disabled] {

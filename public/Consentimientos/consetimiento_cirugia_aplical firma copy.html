@@ -28,37 +28,9 @@
 	</style>
 </head>
 
-<script>
-	const params = new URLSearchParams(location.search);
-	const nombre = params.get('nombre') || '';
-	const numero = params.get('numero') || '';
-	const celular = params.get('celular') || '';
-	const correo = params.get('correo') || '';
-	const profDocumento = params.get('profDocumento') || '';
-	const profNombre = params.get('profNombre') || '';
-	const EmpDocumento = params.get('EmpDocumento') || '';
-	const EmpNombre = params.get('EmpNombre') || '';
-	// const fecha = params.get('fecha') || '';
-	const Fecha = new Date().toLocaleDateString('es-CO');
+ 
 
-	// Ejemplo: pintar en campos
-	//   document.getElementById('pacienteNombre')?.textContent = nombre;
-
-
-	//   document.getElementById('T1').textContent = nombre;
-	function toggle() {
-		document.getElementById('T1').value = nombre;
-		document.getElementById('T5').value = numero;
-		document.getElementById('T29').value = profNombre;
-		document.getElementById('T30').value = Fecha;
-		document.getElementById('Entidad3').src =  `../FirmasProfesionales/${profDocumento}.png`;
-		//  document.getElementById('T6t').value = profDocumento;
-	}
-
-	// ...
-</script>
-
-<body onload="toggle()">
+<body >
 
 	<div align="center">
 		<table border="0" width="680" cellspacing="0" cellpadding="0" id="table1">
@@ -109,6 +81,7 @@
 							<td>
 								<font face="Arial">
 									<input name="T1" type="text" id="T1" size="35">
+									<input name="T11" type="text" id="T11" size="35">
 								</font>
 							</td>
 							<td>&nbsp;</td>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Las T</title>
+</head>
+
+<script>
+    const params = new URLSearchParams(location.search);
+    const nombre = params.get('nombre') || '';
+    const CedulaPaciente = params.get('numero') || '';
+    const celular = params.get('celular') || '';
+    const correo = params.get('correo') || '';
+
+    const profDocumento = params.get('profDocumento') || '';
+    const profNombre = params.get('profNombre') || '';
+    const EmpDocumento = params.get('EmpDocumento') || '';
+    const EmpNombre = params.get('EmpNombre') || '';
+    const Fecha = new Date().toLocaleDateString('es-CO');
+
+    function toggle() {
+
+
+        document.getElementById('nombre').value = nombre;
+        document.getElementById('CedulaPaciente').value = CedulaPaciente;
+        document.getElementById('celular').value = celular;
+        document.getElementById('correo').value = correo;
+        document.getElementById('Fecha').value = Fecha;
+        document.getElementById('Entidad3').src = `../FirmasProfesionales/${profDocumento}.png`;
+        document.getElementById('profDocumento').value = profDocumento;
+        document.getElementById('profNombre').value = profNombre;
+
+
+    } 
+</script>
+
+<body onload="toggle()">
+
+
+
+    <b> nombre</b>
+    <br>
+    <input type="text" id="nombre" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>
+    <b>CedulaPaciente</b>
+    
+    <br>
+    <input type="text" id="CedulaPaciente" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>
+    <b>celular</b>
+    
+    <br>
+    <input type="text" id="celular" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>
+    <b>correo</b>
+    
+    <br>
+    <input type="text" id="correo" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>
+    <b>Fecha</b>
+    
+    <br>
+    <input type="text" id="Fecha" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>
+    <b>Firma Profesional</b>
+    
+    <td colspan="2"><img id="Entidad3" src="" style="width: 260px; height: 120px;"></td>
+    <br>
+    <b>profDocumento</b>
+    
+    <br>
+    <input type="text" id="profDocumento" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>    
+    <b>profNombre</b>
+    
+    <br>
+    <input type="text" id="profNombre" size="25" readonly="readonly" style="font-size: 12pt" style="">
+    <br>
+    <b>Firma Pciente</b>
+    <br>
+	<img id="firmaPaciente" alt="Firma del paciente" style="width:260px;height:120px;object-fit:contain;border:1px dashed #999;" />
+    <br>
+
+ 
+ 
+</body>
+
+</html>

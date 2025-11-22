@@ -48,4 +48,19 @@ export class CnstaNestPacientesFormula {
 
   @ViewColumn({ name: 'Descripción Sexo' })
   descripcionSexo: string;
+
+  @ViewColumn({ name: 'Primer Apellido Entidad' })
+  PrimerApellido: string;
+
+  @ViewColumn({ name: 'Segundo Apellido Entidad' })
+  SegundoApellido: string;
+
+  @ViewColumn({ name: 'Primer Nombre Entidad' })
+  PrimerNombre: string;
+
+  @ViewColumn({ name: 'Segundo Nombre Entidad' })
+  SegundoNombre: string;
+
+  @ViewColumn({ name: 'Nombre Completo Entidad' })
+  NombreCompleto: string;
 }

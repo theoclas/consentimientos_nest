@@ -23,11 +23,12 @@ ADD CONSTRAINT DF_DocumentoAnexo_Fecha
 DEFAULT GETDATE() FOR [Fecha Documento Anexo];
 
 
+
 CREATE VIEW [dbo].[Cnsta nest Pacientes Formula]
 AS
 SELECT dbo.Entidad.[Documento Entidad], dbo.EntidadIII.[Edad EntidadIII], dbo.EntidadII.[Dirección EntidadII], dbo.EntidadII.[Id Ciudad], dbo.Ciudad.Ciudad, dbo.EntidadII.[Teléfono No 1 EntidadII], dbo.EntidadII.[Teléfono No 2 EntidadII], 
                   dbo.EntidadII.[Teléfono Celular EntidadII], dbo.EntidadIII.[Fecha Nacimiento EntidadIII], dbo.EntidadIII.[Id Unidad de Medida Edad], dbo.EntidadIII.[Id Sexo], dbo.Sexo.Sexo, dbo.EntidadIII.[Id Estado Civil], dbo.[Estado Civil].[Estado Civil], 
-                  dbo.Sexo.[Descripción Sexo]
+                  dbo.Sexo.[Descripción Sexo], dbo.Entidad.[Primer Apellido Entidad], dbo.Entidad.[Segundo Apellido Entidad], dbo.Entidad.[Primer Nombre Entidad], dbo.Entidad.[Segundo Nombre Entidad], dbo.Entidad.[Nombre Completo Entidad]
 FROM     dbo.Entidad INNER JOIN
                   dbo.EntidadII ON dbo.Entidad.[Documento Entidad] = dbo.EntidadII.[Documento Entidad] INNER JOIN
                   dbo.EntidadIII ON dbo.Entidad.[Documento Entidad] = dbo.EntidadIII.[Documento Entidad] INNER JOIN
@@ -35,7 +36,6 @@ FROM     dbo.Entidad INNER JOIN
                   dbo.Sexo ON dbo.EntidadIII.[Id Sexo] = dbo.Sexo.[Id Sexo] INNER JOIN
                   dbo.[Estado Civil] ON dbo.EntidadIII.[Id Estado Civil] = dbo.[Estado Civil].[Id Estado Civil]
 GO
-
 
 
 
