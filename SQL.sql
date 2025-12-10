@@ -62,3 +62,11 @@ WHERE  (dbo.Función.Función = N'Profesional') AND (dbo.Entidad.[Id Estado] <> 
 ORDER BY [Nombres Profesional]
 GO
 
+CREATE VIEW [dbo].[Cnsta Nest Objetos Medicamentos]
+AS
+SELECT dbo.Capítulo.Capítulo, dbo.Subcapítulo.Subcapítulo, dbo.Objeto.[Código Objeto], dbo.Objeto.[Descripción Objeto]
+FROM     dbo.Capítulo INNER JOIN
+                  dbo.Subcapítulo ON dbo.Capítulo.[Id Capítulo] = dbo.Subcapítulo.[Id Capítulo] INNER JOIN
+                  dbo.Objeto ON dbo.Subcapítulo.[Id Subcapítulo] = dbo.Objeto.[Id Subcapítulo]
+WHERE  (dbo.Capítulo.Capítulo LIKE N'%medi%')
+GO

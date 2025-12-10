@@ -269,6 +269,44 @@
       }
     }
   </style>
+
+  <style>
+    #autocomplete-medicamentos .autocomplete-container {
+      position: relative;
+      max-width: 400px;
+    }
+
+    #autocomplete-medicamentos .autocomplete-input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    #autocomplete-medicamentos .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      border: 1px solid #ccc;
+      background: #fff;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    #autocomplete-medicamentos .autocomplete-item {
+      padding: 6px 8px;
+      cursor: pointer;
+    }
+
+    #autocomplete-medicamentos .autocomplete-item:hover {
+      background: #f0f0f0;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -302,61 +340,122 @@
           </div>
           <div class="body">
             <form id="formulaForm" class="info-grid">
-              <!-- Documento (único editable) -->
+
               <div class="card">
                 <div class="label">Documento</div>
                 <input class="input" id="docFormula" placeholder="Ingrese documento para consultar..." />
-                <button type="button" id="Buscarbtn2" class="btn">Buscar</button>
+                <button type="button" id="Buscarbtn2" onclick="enviarDatos()" class="btn">Buscar</button>
               </div>
 
-              <!-- Campos de solo lectura -->
+
               <div class="card">
                 <div class="label">Nombre</div>
                 <input class="input readonly" id="NombrePaciente" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Edad</div>
                 <input class="input readonly" id="edadFormula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Dirección</div>
                 <input class="input readonly" id="direccionFormula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Ciudad</div>
                 <input class="input readonly" id="ciudadFormula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Teléfono #1</div>
                 <input class="input readonly" id="telefono1Formula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Teléfono #2</div>
                 <input class="input readonly" id="telefono2Formula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Celular</div>
                 <input class="input readonly" id="celularFormula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Fecha Nacimiento</div>
                 <input type="date" class="input readonly" id="fechaNacFormula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Sexo</div>
                 <input class="input readonly" id="sexoFormula" readonly />
               </div>
-              <div class="card">
+              <div class="card" style="display: none;">
                 <div class="label">Estado Civil</div>
                 <input class="input readonly" id="estadoCivilFormula" readonly />
               </div>
-              <!-- <div class="card">
-                <div class="label">Descripción Sexo</div>
-                <input class="input readonly" id="descSexoFormula" readonly />
-              </div> -->
+
             </form>
           </div>
         </div>
+        <div id="autocomplete-medicamentos">
+          <div class="autocomplete-container">
+            <input id="medicamento-input" class="autocomplete-input" type="text"
+              placeholder="Escribe el nombre del medicamento..." autocomplete="off" />
+            <ul id="medicamento-list" class="autocomplete-list" style="display:none;"></ul>
+          </div>
+
+          <p id="seleccionado" class="small"></p>
+
+          <!-- 🔹 Botón para enviar el medicamento a la fórmula -->
+          <button type="button" id="btnAgregarMed" class="btn">
+            Agregar a fórmula
+          </button>
+        </div>
+        <script src="js/ListaFormulaMedica/ListaFormulaMedica.js"></script>
+        <div class="body">
+
+          <Textarea id="formulaTextarea" style="display: none; width:90%; height:300px;"
+            placeholder="Aquí se generará la fórmula médica...">
+  </Textarea>
+
+          <!-- IFRAME OCULTO AL INICIO -->
+          <iframe id="formIframe" src="Formulamedica/Formula.html"
+            style="width:100%; height:900px; border:none; margin-top:20px; display:none;">
+          </iframe>
+
+          <script>
+            function enviarDatos() {
+              // 1. (Opcional) mostrar la sección completa si está oculta
+              const seccionFormula = document.getElementById("formulaMedica");
+              if (seccionFormula) {
+                seccionFormula.hidden = false;
+              }
+
+              // 2. Tomar los datos del formulario de arriba
+              var nombrePaciente = document.getElementById("NombrePaciente").value;
+              var edadPaciente = document.getElementById("edadFormula").value;
+              var documentoPaciente = document.getElementById("docFormula").value;
+              var fechaHoy = new Date().toLocaleDateString("es-CO");
+
+              // 3. Mostrar el iframe
+              const iframe = document.getElementById("formIframe");
+              iframe.style.display = "block";
+
+              // 4. Enviar los datos al iframe usando postMessage
+              iframe.contentWindow.postMessage(
+                {
+                  nombrePaciente: nombrePaciente,
+                  edadPaciente: edadPaciente,
+                  documentoPaciente: documentoPaciente,
+                  fechaHoy: fechaHoy
+                },
+                "*" // targetOrigin (por simplicidad, cualquiera)
+              );
+            }
+
+            // ⚠️ IMPORTANTE: NO LLAMAR enviarDatos() AQUÍ DIRECTO.
+            // Solo se ejecuta cuando el usuario hace clic en "Buscar"
+            // porque ya tienes: onclick="enviarDatos()" en el botón.
+          </script>
+
+        </div>
+
+
       </section>
 
 
@@ -438,7 +537,7 @@
     </main>
   </div>
 
-<script type="module" src="/js/main.js"></script>
+  <script type="module" src="/js/main.js"></script>
 </body>
 <style>
   .btn[disabled] {

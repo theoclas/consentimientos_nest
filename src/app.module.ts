@@ -17,6 +17,7 @@ import { DocumentoAnexoArchivoModule } from './documento-anexo-archivo/documento
 import { EmpresasModule } from './empresas/empresas.module';
 import { EvaluacionentidadModule } from './evaluacionentidad/evaluacionentidad.module'; 
 import { CnstaNestPacientesFormulaModule } from './cnsta-nest-pacientes-formula/cnsta-nest-pacientes-formula.module';
+import { MedicamentosModule } from './medicamentos/medicamentos.module';
 
 @Module({
   imports: [
@@ -52,7 +53,7 @@ import { CnstaNestPacientesFormulaModule } from './cnsta-nest-pacientes-formula/
     DocumentoAnexoArchivoModule,
     EmpresasModule,
     EvaluacionentidadModule, 
-    CnstaNestPacientesFormulaModule,
+    CnstaNestPacientesFormulaModule, MedicamentosModule,
   ],
 
   controllers: [AppController, ConsentimientosController],
