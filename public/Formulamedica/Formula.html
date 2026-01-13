@@ -109,7 +109,7 @@
             margin: 0 auto 3px;
         }
 
-        @media print {
+        /* @media print {
             body {
                 background: #ffffff;
                 margin: 0;
@@ -120,6 +120,25 @@
                 margin: 0;
                 width: 100%;
                 max-width: none;
+            }
+        } */
+        @media print {
+            body {
+                margin: 0;
+                background: #fff;
+            }
+
+            .hoja {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
+
+            button,
+            .no-print {
+                display: none !important;
             }
         }
     </style>
@@ -193,9 +212,7 @@
         <section class="bloque">
             <label>Prescripción:</label>
             <div class="receta" id="ContenidoFormula" contenteditable="true">
-                - Medicamento 1: Dosis, vía, frecuencia, tiempo.
-                - Medicamento 2: Dosis, vía, frecuencia, tiempo.
-                - Indicaciones adicionales: ...
+                <!-- Aquí se agregarán los medicamentos -->
             </div>
         </section>
 

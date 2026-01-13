@@ -5,6 +5,7 @@ import { tryFetch, apiHeaders } from '../utils/api.js';
 async function consultarPacienteFormula() {
   const docInput = document.getElementById('docFormula');
   const documento = docInput?.value.trim() || '';
+  
 
   if (!documento) {
     alert('Ingrese un documento para consultar.');
@@ -55,6 +56,8 @@ async function consultarPacienteFormula() {
     data['estadoCivil'] ?? '';
   document.getElementById('NombrePaciente').value =
     data['NombreCompleto'] ?? '';
+
+  
 }
 
 export function initFormula() {
@@ -69,4 +72,34 @@ export function initFormula() {
   });
 
   buscarBtn?.addEventListener('click', consultarPacienteFormula);
+
+
+   const btnImprimir = document.getElementById('btnImprimirformula');
+  const iframe = document.getElementById('formIframe');
+
+  btnImprimir?.addEventListener('click', () => {
+    if (!iframe) {
+      alert('No existe el iframe de Fórmula (formIframe).');
+      return;
+    }
+
+    // si lo estás ocultando con display:none cuando NO está activo:
+    const hiddenByDisplay = getComputedStyle(iframe).display === 'none';
+    if (hiddenByDisplay) {
+      alert('Primero abre/carga la Fórmula Médica para imprimir.');
+      return;
+    }
+
+    // imprime SOLO el contenido del iframe
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+  });
+
 }
+
+
+// export function initFormula() {
+ 
+ 
+// }
+

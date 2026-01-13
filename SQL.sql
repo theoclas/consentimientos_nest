@@ -70,3 +70,54 @@ FROM     dbo.Capítulo INNER JOIN
                   dbo.Objeto ON dbo.Subcapítulo.[Id Subcapítulo] = dbo.Objeto.[Id Subcapítulo]
 WHERE  (dbo.Capítulo.Capítulo LIKE N'%medi%')
 GO
+
+
+
+
+create  PROCEDURE [dbo].[PA Nest Insertar Formula Medica]
+	@Contenido NVarchar(700) = Null,
+	@DocumentoEmpresa Nvarchar(50)= Null,
+	@DocumentoPaciente Nvarchar(50)= Null
+AS
+BEGIN
+  SET NOCOUNT ON;
+	INSERT INTO [dbo].[Evaluación Entidad]
+           ([Id Tipo de Evaluación] ,[Fecha Evaluación Entidad] ,[Documento Entidad]
+           ,[Edad Entidad Evaluación Entidad] ,[Acompañante Evaluación Entidad] ,[Id Parentesco]
+           ,[Teléfono Acompañante] ,[Diagnóstico General Evaluación Entidad]  ,[Diagnóstico Específico Evaluación Entidad]
+           ,[Manejo de Medicamentos] ,[Dirección Domicilio] ,[Id Ciudad]
+           ,[Teléfono Domicilio] ,[Fecha Nacimiento] ,[Id Unidad de Medida Edad]
+           ,[Id Sexo] ,[Id Estado] ,[Id Estado Civil] ,[Id Ocupación] ,[Documento Aseguradora]
+           ,[Id Tipo de Afiliado] ,[Responsable Evaluación Entidad] ,[Id Parentesco Responsable]
+           ,[Teléfono Responsable] ,[Documento Usuario] ,[Documento Empresa]
+           ,[Id Terminal] ,[Documento Profesional] ,[Id Estado Web]
+           ,[Con Orden] ,[Firma Evaluación Entidad] ,[Sincronizado]
+           ,[PreguntarControl] ,[NombreFormatoAux] ,[Rips])
+
+             SELECT 2, Getdate(), @DocumentoPaciente,  
+              Eiii.[Edad EntidadIII], 'Sin acompañante', 1, 
+              'Sin Acompañante', 'Formula Medica', @Contenido,
+              0, Eii.[Dirección EntidadII], eii.[Id Ciudad],
+              eii.[Teléfono Celular EntidadII], eiii.[Fecha Nacimiento EntidadIII], eiii.[Id Unidad de Medida Edad],
+              eiii.[Id Sexo], 7, eiii.[Id Estado Civil], 1, 70123456, 
+              1, 'Sin Responsable', 1,
+              '', 70123456, @DocumentoEmpresa,
+              1458 , 70123456 ,1, 
+              0, NULL, 0,
+              0, 0, 1
+  
+              FROM ENTIDAD E
+                       inner join EntidadII EII ON EII.[Documento Entidad] = E.[Documento Entidad]
+                       INNER JOIN ENTIDADIII EIII ON EIII.[Documento Entidad] = E.[Documento Entidad]
+
+                WHERE E.[Documento Entidad] = @DocumentoPaciente
+
+	
+	
+		END			
+
+
+
+
+
+    

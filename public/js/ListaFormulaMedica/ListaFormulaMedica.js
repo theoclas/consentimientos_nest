@@ -2,6 +2,9 @@ const input = document.getElementById('medicamento-input');
 const list = document.getElementById('medicamento-list');
 const labelSeleccionado = document.getElementById('seleccionado');
 const btnAgregarMed = document.getElementById('btnAgregarMed');
+const btnIngresarACeere = document.getElementById('btnIngresarACeere');
+const EmpresasSelect = document.getElementById('EmpresasSelect');
+
 
 let timer = null;
 // 🔹 aquí guardamos el último medicamento seleccionado
@@ -78,13 +81,26 @@ function onSelect(med) {
   labelSeleccionado.textContent = `Seleccionado: ${med.descripcionObjeto} (código: ${med.codigoObjeto})`;
 }
 
+if (btnIngresarACeere) {
+  btnIngresarACeere.addEventListener('click', () => {
+    if(!EmpresasSelect.value){
+      alert('Debes Seleccionar una Empresa');
+      return;
+    }
+    
+
+      alert('prueba');
+
+  });
+}
+
 // 🔹 Cuando el usuario haga clic en "Agregar a fórmula"
 if (btnAgregarMed) {
   btnAgregarMed.addEventListener('click', () => {
-    if (!medicamentoSeleccionado) {
-      alert('Primero selecciona un medicamento de la lista.');
-      return;
-    }
+    // if (!medicamentoSeleccionado) {
+    //   alert('Primero selecciona un medicamento de la lista.');
+    //   return;
+    // }
 
     // Línea que quieres agregar
     const linea = `• ${medicamentoSeleccionado.descripcionObjeto}`;

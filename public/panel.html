@@ -279,7 +279,12 @@
     #autocomplete-medicamentos .autocomplete-input {
       width: 100%;
       padding: 8px;
-      box-sizing: border-box;
+      box-sizing: border-box; 
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      background-color: beige;
+      /* color: #475569; */
+      border-color: #e2e8f0;
     }
 
     #autocomplete-medicamentos .autocomplete-list {
@@ -309,7 +314,7 @@
 
 </head>
 
-<body>
+<body >
   <div class="app">
     <header>
       <div class="left">
@@ -347,10 +352,13 @@
                 <button type="button" id="Buscarbtn2" onclick="enviarDatos()" class="btn">Buscar</button>
               </div>
 
+              <div class="row" style="margin-top:12px;">
+                <select id="EmpresasSelect"></select>
+              </div>
 
               <div class="card">
                 <div class="label">Nombre</div>
-                <input class="input readonly" id="NombrePaciente" readonly />
+                <input onchange="BtnFormula()" class="input readonly" id="NombrePaciente" readonly />
               </div>
               <div class="card" style="display: none;">
                 <div class="label">Edad</div>
@@ -389,29 +397,56 @@
                 <input class="input readonly" id="estadoCivilFormula" readonly />
               </div>
 
+
+              <div id="autocomplete-medicamentos">
+                <div class="autocomplete-container">
+                  <input id="medicamento-input" class="autocomplete-input" type="text"
+                    placeholder="Escribe el nombre del medicamento..." autocomplete="off" />
+                  <ul id="medicamento-list" class="autocomplete-list" style="display:none;"></ul>
+                </div>
+
+                <p id="seleccionado" class="small"></p>
+
+                <!-- 🔹 Botón para enviar el medicamento a la fórmula -->
+                <button type="button" id="btnAgregarMed" class="btn">
+                  Agregar a fórmula
+                </button>
+
+                <button type="button" id="btnImprimirformula" class="btn" style="display:none;">
+                  Imprimir Fórmula Médica
+                </button>
+
+                <button type="button" id="btnIngresarACeere" class="btn">
+                  Ingresar A CeereSio
+                </button>
+              </div>
+
             </form>
-          </div>
-        </div>
-        <div id="autocomplete-medicamentos">
-          <div class="autocomplete-container">
-            <input id="medicamento-input" class="autocomplete-input" type="text"
-              placeholder="Escribe el nombre del medicamento..." autocomplete="off" />
-            <ul id="medicamento-list" class="autocomplete-list" style="display:none;"></ul>
+
+
           </div>
 
-          <p id="seleccionado" class="small"></p>
 
-          <!-- 🔹 Botón para enviar el medicamento a la fórmula -->
-          <button type="button" id="btnAgregarMed" class="btn">
-            Agregar a fórmula
-          </button>
+
         </div>
+        <script>
+          function BtnFormula(nombrePaciente) {
+            const btnImprimir = document.getElementById("btnImprimirformula");
+           
+            if (nombrePaciente.trim() !== "") {
+              btnImprimir.style.display = "inline-block";
+            } else {
+              btnImprimir.style.display = "none";
+            }
+          }
+        </script>
+
+
         <script src="js/ListaFormulaMedica/ListaFormulaMedica.js"></script>
+
         <div class="body">
 
-          <Textarea id="formulaTextarea" style="display: none; width:90%; height:300px;"
-            placeholder="Aquí se generará la fórmula médica...">
-  </Textarea>
+
 
           <!-- IFRAME OCULTO AL INICIO -->
           <iframe id="formIframe" src="Formulamedica/Formula.html"
@@ -446,6 +481,8 @@
                 },
                 "*" // targetOrigin (por simplicidad, cualquiera)
               );
+
+              BtnFormula(nombrePaciente);
             }
 
             // ⚠️ IMPORTANTE: NO LLAMAR enviarDatos() AQUÍ DIRECTO.

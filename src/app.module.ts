@@ -18,6 +18,9 @@ import { EmpresasModule } from './empresas/empresas.module';
 import { EvaluacionentidadModule } from './evaluacionentidad/evaluacionentidad.module'; 
 import { CnstaNestPacientesFormulaModule } from './cnsta-nest-pacientes-formula/cnsta-nest-pacientes-formula.module';
 import { MedicamentosModule } from './medicamentos/medicamentos.module';
+import { EvaluacionFormulaModule } from './evaluacion-formula/evaluacion-formula.module';
+import { CnstaNestEntidadEvaluacionModule } from './cnsta-nest-entidad-evaluacion/cnsta-nest-entidad-evaluacion.module';
+import { FormulaModule } from './formula/formula.module';
 
 @Module({
   imports: [
@@ -53,7 +56,7 @@ import { MedicamentosModule } from './medicamentos/medicamentos.module';
     DocumentoAnexoArchivoModule,
     EmpresasModule,
     EvaluacionentidadModule, 
-    CnstaNestPacientesFormulaModule, MedicamentosModule,
+    CnstaNestPacientesFormulaModule, MedicamentosModule, EvaluacionFormulaModule, CnstaNestEntidadEvaluacionModule, FormulaModule,
   ],
 
   controllers: [AppController, ConsentimientosController],
